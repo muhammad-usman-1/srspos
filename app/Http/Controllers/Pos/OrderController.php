@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pos;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Order\OrderStoreRequest;
 use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -47,17 +48,38 @@ class OrderController extends Controller
                 }
 
                 // Create order items and update product quantities
+                $orderTotal = 0.0;
                 foreach ($cartItems as $item) {
+                    if ($item->quantity < $item->pivot->quantity) {
+                        throw new \Exception(__('cart.available', ['quantity' => $item->quantity]) . ' (' . $item->name . ')');
+                    }
                     $this->createOrderItem($order, $item);
-                    $this->reduceProductStock($item);
+                    $this->reduceProductStock($item, $order);
+                    $orderTotal += $item->price * $item->pivot->quantity;
                 }
+
+                // Discount and tax (only when the admin has enabled them in Settings)
+                $subtotal = round($orderTotal, 2);
+                $discount = 0.0;
+                if (config('settings.enable_discount') && $request->filled('discount_value')) {
+                    $value = (float) $request->discount_value;
+                    $discount = $request->input('discount_type') === 'percent' ? $subtotal * min($value, 100) / 100 : $value;
+                    $discount = round(min($discount, $subtotal), 2);
+                }
+                $taxRate = config('settings.enable_tax') ? (float) $request->input('tax_rate', config('settings.tax_rate', 0)) : 0.0;
+                $taxAmount = round(($subtotal - $discount) * $taxRate / 100, 2);
+                $grandTotal = round($subtotal - $discount + $taxAmount, 2);
+                $order->update(['discount' => $discount, 'tax_rate' => $taxRate, 'tax_amount' => $taxAmount]);
 
                 // Clear cart
                 $request->user()->cart()->detach();
 
                 // Create payment
                 $order->payments()->create([
-                    'amount' => $request->amount,
+                    // Cash handed over beyond the bill is change, not revenue.
+                    'amount' => min((float) $request->amount, $grandTotal),
+                    'method' => $request->input('method', 'cash') ?: 'cash',
+                    'tendered' => (float) $request->amount,
                     'user_id' => $request->user()->id,
                 ]);
 
@@ -90,6 +112,7 @@ class OrderController extends Controller
         DB::transaction(function () use ($order, $request): void {
             $order->payments()->create([
                 'amount' => $request->amount,
+                'method' => array_key_exists((string) $request->input('method'), Payment::METHODS) ? $request->input('method') : 'cash',
                 'user_id' => auth()->id(),
             ]);
         });
@@ -107,6 +130,7 @@ class OrderController extends Controller
     {
         $order->items()->create([
             'price' => $item->price * $item->pivot->quantity,
+            'mkt_price' => $item->mkt_price,
             'quantity' => $item->pivot->quantity,
             'product_id' => $item->id,
         ]);
@@ -115,8 +139,18 @@ class OrderController extends Controller
     /**
      * Reduce product stock based on cart quantity.
      */
-    private function reduceProductStock($item): void
+    private function reduceProductStock($item, Order $order): void
     {
-        $item->decrement('quantity', $item->pivot->quantity);
+        $item->adjustStock(-$item->pivot->quantity, 'sale', 'Order #' . $order->id);
+    }
+
+    /**
+     * Printable 80mm receipt (auto prints when ?print=1).
+     */
+    public function receipt(Order $order): \Illuminate\Contracts\View\View
+    {
+        $order->load(['items.product', 'payments', 'customer', 'user']);
+
+        return view('orders.receipt', ['order' => $order]);
     }
 }

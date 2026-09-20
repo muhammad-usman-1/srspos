@@ -72,6 +72,17 @@
             </div>
 
             <div class="form-group">
+                <label for="mkt_price">{{ __('Market Price (MKT) - optional') }}</label>
+                <input type="text" name="mkt_price" class="form-control @error('mkt_price') is-invalid @enderror" id="mkt_price"
+                    placeholder="{{ __('Shown on the bill so customers see what they saved') }}" value="{{ old('mkt_price', $product->mkt_price) }}">
+                @error('mkt_price')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
+
+            <div class="form-group">
                 <label for="quantity">{{ __('product.Quantity') }}</label>
                 <input type="text" name="quantity" class="form-control @error('quantity') is-invalid @enderror"
                     id="quantity" placeholder="{{ __('product.Quantity') }}" value="{{ old('quantity', $product->quantity) }}">

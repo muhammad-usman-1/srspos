@@ -14,7 +14,7 @@ class RemoveFromCartRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'integer', 'exists:products,id'],
+            'product_id' => ['required', 'integer', \Illuminate\Validation\Rule::exists('products', 'id')->where('store_id', auth()->user()->store_id)],
         ];
     }
 

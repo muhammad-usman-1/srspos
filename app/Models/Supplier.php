@@ -3,6 +3,7 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToStore;
 use Database\Factories\SupplierFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,6 +40,7 @@ use Illuminate\Support\Facades\Storage;
  */
 class Supplier extends Model
 {
+    use BelongsToStore;
     use HasFactory;
 
     protected $fillable = [

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToStore;
 use App\Traits\ProductScopes;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
@@ -48,6 +51,7 @@ use Illuminate\Support\Facades\Storage;
  */
 class Product extends Model
 {
+    use BelongsToStore;
     use HasFactory;
     use ProductScopes;
 
@@ -57,6 +61,7 @@ class Product extends Model
         'image',
         'barcode',
         'price',
+        'mkt_price',
         'quantity',
         'status'
     ];
@@ -78,5 +83,35 @@ class Product extends Model
         }
 
         return asset('images/img-placeholder.jpg');
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    /**
+     * Change stock by a signed amount and record it in the stock ledger.
+     */
+    public function adjustStock(int $delta, string $type, ?string $reference = null, ?string $note = null): StockMovement
+    {
+        return DB::transaction(function () use ($delta, $type, $reference, $note): StockMovement {
+            $locked = static::query()->lockForUpdate()->findOrFail($this->id);
+            $locked->quantity += $delta;
+            $locked->save();
+
+            $this->quantity = $locked->quantity;
+            $this->syncOriginalAttribute('quantity');
+
+            return $this->stockMovements()->create([
+                'user_id' => auth()->id(),
+                'store_id' => $this->store_id,
+                'type' => $type,
+                'quantity' => $delta,
+                'balance_after' => $locked->quantity,
+                'reference' => $reference,
+                'note' => $note,
+            ]);
+        });
     }
 }

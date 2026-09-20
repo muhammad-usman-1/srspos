@@ -22,13 +22,13 @@ class PurchaseStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'supplier_id' => 'required|exists:suppliers,id',
+            'supplier_id' => ['required', \Illuminate\Validation\Rule::exists('suppliers', 'id')->where('store_id', auth()->user()->store_id)],
             'purchase_date' => 'required|date',
             'total_amount' => 'required|numeric|min:0',
             'status' => 'required|in:pending,completed,cancelled',
             'notes' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.product_id' => ['required', \Illuminate\Validation\Rule::exists('products', 'id')->where('store_id', auth()->user()->store_id)],
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.purchase_price' => 'required|numeric|min:0',
         ];

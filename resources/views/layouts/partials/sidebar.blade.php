@@ -2,8 +2,7 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="{{route('home')}}" class="brand-link">
-        <img src="{{ asset('images/logo.png') }}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
-             style="opacity: .8">
+        <img src="{{ app_logo_url() }}" alt="AdminLTE Logo" class="brand-image" style="opacity:.95;object-fit:contain;max-height:33px;width:auto">
         <span class="brand-text font-weight-light">{{ config('app.name') }}</span>
     </a>
 
@@ -12,6 +11,15 @@
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                @if(auth()->user()->isSuperAdmin())
+                <li class="nav-header">{{ __('Owner') }}</li>
+                <li class="nav-item">
+                    <a href="{{ route('superadmin.stores.index') }}" class="nav-link {{ request()->routeIs('superadmin.*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-store"></i>
+                        <p>{{ __('Stores') }}</p>
+                    </a>
+                </li>
+                @else
                 <!-- Dashboard -->
                 <li class="nav-item">
                     <a href="{{route('home')}}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
@@ -20,11 +28,11 @@
                     </a>
                 </li>
 
-                <!-- Products -->
+                <!-- Stock -->
                 <li class="nav-item">
-                    <a href="{{ route('products.index') }}" class="nav-link {{ activeSegment('products') }}">
-                        <i class="nav-icon fas fa-th-large"></i>
-                        <p>{{ __('product.title') }}</p>
+                    <a href="{{ route('stock.index') }}" class="nav-link {{ activeSegment('stock') ?: activeSegment('products') }}">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <p>{{ __('Stock Management') }}</p>
                     </a>
                 </li>
 
@@ -94,6 +102,8 @@
                         <p>{{ __('settings.title') }}</p>
                     </a>
                 </li>
+
+                @endif
 
                 <!-- Logout -->
                 <li class="nav-item">

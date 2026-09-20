@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToStore;
 use App\Traits\PurchaseScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,6 +48,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Purchase extends Model
 {
+    use BelongsToStore;
     use HasFactory;
     use PurchaseScopes;
 

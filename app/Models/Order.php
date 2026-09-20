@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToStore;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,11 +38,15 @@ use Illuminate\Support\Carbon;
  */
 class Order extends Model
 {
+    use BelongsToStore;
     use HasFactory;
 
     protected $fillable = [
         'customer_id',
-        'user_id'
+        'user_id',
+        'discount',
+        'tax_rate',
+        'tax_amount',
     ];
 
     /**
@@ -90,6 +95,14 @@ class Order extends Model
      * Calculate order total.
      */
     public function total(): float
+    {
+        return max(round($this->subtotal() - (float) $this->discount + (float) $this->tax_amount, 2), 0);
+    }
+
+    /**
+     * Sum of the line items, before discount and tax.
+     */
+    public function subtotal(): float
     {
         if ($this->relationLoaded('items')) {
             return (float) $this->items->sum('price');

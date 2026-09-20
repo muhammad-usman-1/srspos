@@ -25,7 +25,7 @@ class ProductController extends Controller
         $products = Product::query()
             ->search($request->search)
             ->latest()
-            ->paginate(10);
+            ->paginate($request->wantsJson() ? 200 : 10);
 
         return $request->wantsJson()
             ? response()->json($products)
@@ -54,7 +54,12 @@ class ProductController extends Controller
             $productData['image'] = $request->file('image')->store('products', 'public');
         }
 
-        Product::create($productData);
+        $quantity = (int) ($productData['quantity'] ?? 0);
+        $productData['quantity'] = 0;
+        $product = Product::create($productData);
+        if ($quantity > 0) {
+            $product->adjustStock($quantity, 'opening', null, 'Initial stock');
+        }
 
         return redirect()->route('products.index')
             ->with('success', __('product.success_creating'));
@@ -94,7 +99,13 @@ class ProductController extends Controller
             $productData['image'] = $request->file('image')->store('products', 'public');
         }
 
+        $newQuantity = (int) ($productData['quantity'] ?? $product->quantity);
+        $delta = $newQuantity - $product->quantity;
+        unset($productData['quantity']);
         $product->update($productData);
+        if ($delta !== 0) {
+            $product->adjustStock($delta, 'adjustment', null, 'Edited from product form');
+        }
 
         return redirect()->route('products.index')
             ->with('success', __('product.success_updating'));

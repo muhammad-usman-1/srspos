@@ -33,6 +33,7 @@ class OrderItem extends Model
 {
     protected $fillable = [
         'price',
+        'mkt_price',
         'quantity',
         'product_id',
         'order_id'

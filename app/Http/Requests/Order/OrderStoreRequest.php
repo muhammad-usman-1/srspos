@@ -16,7 +16,11 @@ class OrderStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
+            'customer_id' => ['nullable', 'integer', \Illuminate\Validation\Rule::exists('customers', 'id')->where('store_id', auth()->user()->store_id)],
+            'method' => ['nullable', 'string', 'in:' . implode(',', array_keys(\App\Models\Payment::METHODS))],
+            'discount_type' => ['nullable', 'in:fixed,percent'],
+            'discount_value' => ['nullable', 'numeric', 'min:0'],
+            'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'amount' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
         ];
     }

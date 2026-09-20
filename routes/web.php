@@ -1,14 +1,18 @@
 <?php
 
 use App\Http\Controllers\Admin\HomeController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Inventory\ProductController;
 use App\Http\Controllers\Inventory\PurchaseCartController;
 use App\Http\Controllers\Inventory\PurchaseController;
+use App\Http\Controllers\Inventory\StockController;
+use App\Http\Controllers\Pos\HeldBillController;
 use App\Http\Controllers\Management\CustomerController;
 use App\Http\Controllers\Management\SupplierController;
 use App\Http\Controllers\Pos\CartController;
 use App\Http\Controllers\Pos\OrderController;
 use App\Http\Controllers\Settings\SettingController;
+use App\Http\Controllers\SuperAdmin\StoreController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
@@ -16,11 +20,19 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn(): Redirector|RedirectResponse => redirect('/admin'));
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
-Route::prefix('admin')->middleware(['auth', 'locale'])->group(function (): void {
+Route::prefix('admin')->middleware(['auth', 'locale', 'store.access'])->group(function (): void {
     Route::get('/', HomeController::class)->name('home');
-    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    // Superadmin: store management
+    Route::prefix('superadmin')->name('superadmin.')->group(function (): void {
+        Route::resource('stores', StoreController::class)->except('show');
+        Route::post('/stores/{store}/toggle', [StoreController::class, 'toggle'])->name('stores.toggle');
+    });
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/settings',[SettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
     Route::resource('products', ProductController::class);
     Route::resource('customers', CustomerController::class);
@@ -48,7 +60,19 @@ Route::prefix('admin')->middleware(['auth', 'locale'])->group(function (): void 
         Route::delete('/empty', [PurchaseCartController::class, 'empty'])->name('empty');
     });
 
+    // Held bills
+    Route::get('/held-bills', [HeldBillController::class, 'index'])->name('held-bills.index');
+    Route::post('/held-bills', [HeldBillController::class, 'store'])->name('held-bills.store');
+    Route::post('/held-bills/{heldBill}/resume', [HeldBillController::class, 'resume'])->name('held-bills.resume');
+    Route::delete('/held-bills/{heldBill}', [HeldBillController::class, 'destroy'])->name('held-bills.destroy');
+
+    // Stock management
+    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+    Route::get('/stock/movements', [StockController::class, 'movements'])->name('stock.movements');
+    Route::post('/stock/{product}/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
+
     // Orders
+    Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
     Route::post('/orders/partial-payment', [OrderController::class, 'partialPayment'])->name('orders.partial-payment');
 
     // Translations

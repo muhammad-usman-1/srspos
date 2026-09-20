@@ -14,7 +14,7 @@ class AddToCartRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'barcode' => ['required', 'string', 'exists:products,barcode'],
+            'barcode' => ['required', 'string', \Illuminate\Validation\Rule::exists('products', 'barcode')->where('store_id', auth()->user()->store_id)],
         ];
     }
 

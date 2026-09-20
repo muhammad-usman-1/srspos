@@ -50,6 +50,9 @@ use Illuminate\Support\Carbon;
  */
 class User extends Authenticatable
 {
+    public const ROLE_SUPERADMIN = 'superadmin';
+    public const ROLE_STORE_ADMIN = 'store_admin';
+
     use HasFactory, Notifiable;
 
     /**
@@ -98,6 +101,16 @@ class User extends Authenticatable
         return $this->belongsToMany(related: Product::class, table: 'user_purchase_cart')
             ->withPivot(['quantity', 'purchase_price'])
             ->withTimestamps();
+    }
+
+    public function store(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Store::class);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_SUPERADMIN;
     }
 
     public function getFullname(): string

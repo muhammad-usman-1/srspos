@@ -36,6 +36,7 @@
                     <th>{{ __('order.Received_Amount') }}</th>
                     <th>{{ __('order.Status') }}</th>
                     <th>{{ __('order.To_Pay') }}</th>
+                    <th>Payment Method</th>
                     <th>{{ __('order.Created_At') }}</th>
                     <th>{{ __('order.Actions') }}</th>
                 </tr>
@@ -62,6 +63,7 @@
                             @endif
                         </td>
                         <td>{{config('settings.currency_symbol')}} {{number_format($orderRemaining, 2)}}</td>
+                        <td>{{ $order->payments->pluck('method')->unique()->map(fn($m) => \App\Models\Payment::METHODS[$m] ?? $m)->implode(', ') ?: '-' }}</td>
                         <td>{{$order->created_at}}</td>
                         <td>
                             <button
@@ -76,6 +78,8 @@
                                 data-created-at="{{ $order->created_at }}">
                                 <ion-icon size="small" name="eye"></ion-icon>
                             </button>
+
+                            <a class="btn btn-sm btn-info" target="_blank" href="{{ route('orders.receipt', ['order' => $order, 'print' => 1]) }}">Print</a>
 
                             @if($orderRemaining > 0)
                                 <button class="btn btn-sm btn-primary btnPartialPayment"
@@ -96,6 +100,7 @@
                     <th></th>
                     <th>{{ config('settings.currency_symbol') }} {{ number_format($total, 2) }}</th>
                     <th>{{ config('settings.currency_symbol') }} {{ number_format($receivedAmount, 2) }}</th>
+                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -125,6 +130,14 @@
                             <label for="partialAmount">Enter Amount to Pay</label>
                             <input type="number" class="form-control" step="0.01" id="partialAmount" name="amount" required>
                             <small class="form-text text-muted">Remaining: <span id="remainingAmount"></span></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="partialMethod">Payment Method</label>
+                            <select class="form-control" id="partialMethod" name="method">
+                                @foreach(\App\Models\Payment::METHODS as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">

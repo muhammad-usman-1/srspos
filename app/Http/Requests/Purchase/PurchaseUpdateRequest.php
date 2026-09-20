@@ -22,7 +22,7 @@ class PurchaseUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'supplier_id' => 'required|exists:suppliers,id',
+            'supplier_id' => ['required', \Illuminate\Validation\Rule::exists('suppliers', 'id')->where('store_id', auth()->user()->store_id)],
             'purchase_date' => 'required|date',
             'total_amount' => 'required|numeric|min:0',
             'status' => 'required|in:pending,completed,cancelled',

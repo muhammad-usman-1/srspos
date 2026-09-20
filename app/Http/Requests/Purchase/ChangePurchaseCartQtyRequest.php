@@ -14,7 +14,7 @@ class ChangePurchaseCartQtyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => 'required|exists:products,id',
+            'product_id' => ['required', \Illuminate\Validation\Rule::exists('products', 'id')->where('store_id', auth()->user()->store_id)],
             'quantity' => 'required|integer|min:1',
         ];
     }

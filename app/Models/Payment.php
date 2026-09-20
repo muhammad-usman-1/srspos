@@ -29,8 +29,18 @@ use Illuminate\Support\Carbon;
  */
 class Payment extends Model
 {
+    public const METHODS = [
+        'cash' => 'Cash',
+        'card' => 'Card',
+        'easypaisa' => 'EasyPaisa',
+        'jazzcash' => 'JazzCash',
+        'bank_transfer' => 'Bank Transfer',
+    ];
+
     protected $fillable = [
         'amount',
+        'method',
+        'tendered',
         'order_id',
         'user_id',
     ];
@@ -47,6 +57,11 @@ class Payment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function methodLabel(): string
+    {
+        return self::METHODS[$this->method] ?? ucfirst((string) $this->method);
     }
 
     public function formattedAmount(): string

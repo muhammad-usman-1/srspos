@@ -17,8 +17,9 @@ class ProductStoreRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:2048'], // 2MB max
-            'barcode' => ['required', 'string', 'max:50', 'unique:products,barcode'],
+            'barcode' => ['required', 'string', 'max:50', \Illuminate\Validation\Rule::unique('products', 'barcode')->where('store_id', auth()->user()->store_id)],
             'price' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
+            'mkt_price' => ['nullable', 'numeric', 'min:0', 'decimal:0,2'],
             'quantity' => ['required', 'integer', 'min:0'],
             'status' => ['required', 'boolean'],
         ];

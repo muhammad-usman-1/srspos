@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
 
         if (! $this->app->runningInConsole()) {
             // 'key' => 'value'
-            $settings = Setting::all('key', 'value')
+            $settings = Setting::whereNull('store_id')->get(['key', 'value'])
                 ->keyBy('key')
                 ->transform(fn($setting) => $setting->value)
                 ->toArray();

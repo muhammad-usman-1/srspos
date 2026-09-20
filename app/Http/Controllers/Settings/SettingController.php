@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SettingController extends Controller
 {
@@ -15,13 +16,29 @@ class SettingController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->except('_token');
+        $request->validate([
+            'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:2048'],
+        ]);
+
+        $storeId = $request->user()->store_id;
+        $data = $request->except(['_token', 'logo', 'remove_logo']);
         foreach ($data as $key => $value) {
-            $setting = Setting::firstOrCreate(['key' => $key]);
+            $setting = Setting::firstOrCreate(['key' => $key, 'store_id' => $storeId]);
             $setting->value = $value;
             $setting->save();
         }
 
-        return redirect()->route('settings.index');
+        $current = config('settings.logo');
+        if ($request->hasFile('logo')) {
+            if ($current) {
+                Storage::disk('public')->delete($current);
+            }
+            Setting::updateOrCreate(['key' => 'logo', 'store_id' => $storeId], ['value' => $request->file('logo')->store('logos', 'public')]);
+        } elseif ($request->boolean('remove_logo') && $current) {
+            Storage::disk('public')->delete($current);
+            Setting::where('key', 'logo')->where('store_id', $storeId)->delete();
+        }
+
+        return redirect()->route('settings.index')->with('success', __('Settings saved.'));
     }
 }

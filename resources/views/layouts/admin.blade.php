@@ -20,7 +20,11 @@
     <script>
         window.APP = <?php echo json_encode([
                             'currency_symbol' => config('settings.currency_symbol'),
-                            'warning_quantity' => config('settings.warning_quantity')
+                            'warning_quantity' => config('settings.warning_quantity'),
+                            'enable_discount' => (bool) config('settings.enable_discount'),
+                            'enable_tax' => (bool) config('settings.enable_tax'),
+                            'tax_name' => config('settings.tax_name') ?: 'Tax',
+                            'tax_rate' => (float) config('settings.tax_rate', 0)
                         ]) ?>
     </script>
 </head>

@@ -94,9 +94,9 @@ class PurchaseController extends Controller
                 // If status is completed, update stock and purchase price
                 if ($request->status === 'completed') {
                     $product = Product::find($item['product_id']);
-                    $product->quantity += $item['quantity'];
                     $product->purchase_price = $item['purchase_price'];
                     $product->save();
+                    $product->adjustStock((int) $item['quantity'], 'purchase', 'Purchase #' . $purchase->id);
                 }
             }
 
@@ -154,15 +154,14 @@ class PurchaseController extends Controller
 
                     // If changing from completed to pending/cancelled: decrease stock
                     if ($oldStatus === 'completed' && in_array($newStatus, ['pending', 'cancelled'])) {
-                        $product->quantity -= $item->quantity;
-                        $product->save();
+                        $product->adjustStock(-$item->quantity, 'purchase_reversal', 'Purchase #' . $purchase->id);
                     }
 
                     // If changing from pending/cancelled to completed: increase stock
                     if (in_array($oldStatus, ['pending', 'cancelled']) && $newStatus === 'completed') {
-                        $product->quantity += $item->quantity;
                         $product->purchase_price = $item->purchase_price;
                         $product->save();
+                        $product->adjustStock($item->quantity, 'purchase', 'Purchase #' . $purchase->id);
                     }
                 }
             }
@@ -192,9 +191,7 @@ class PurchaseController extends Controller
             // If purchase was completed, reverse stock changes
             if ($purchase->status === 'completed') {
                 foreach ($purchase->items as $item) {
-                    $product = $item->product;
-                    $product->quantity -= $item->quantity;
-                    $product->save();
+                    $item->product->adjustStock(-$item->quantity, 'purchase_reversal', 'Purchase #' . $purchase->id . ' deleted');
                 }
             }
 

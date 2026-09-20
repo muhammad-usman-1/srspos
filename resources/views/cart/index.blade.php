@@ -3,7 +3,9 @@
 @section('title', __('order.title'))
 
 @section('content')
-    <div id="cart"></div>
+    <div class="container-fluid pos-page">
+        <div id="cart"></div>
+    </div>
     <!--cart></cart-->
 
 @endsection

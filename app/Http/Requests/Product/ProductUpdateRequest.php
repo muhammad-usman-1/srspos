@@ -22,9 +22,10 @@ class ProductUpdateRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('products', 'barcode')->ignore($this->product)
+                Rule::unique('products', 'barcode')->where('store_id', auth()->user()->store_id)->ignore($this->product)
             ],
             'price' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
+            'mkt_price' => ['nullable', 'numeric', 'min:0', 'decimal:0,2'],
             'quantity' => ['required', 'integer', 'min:0'],
             'status' => ['required', 'boolean'],
         ];

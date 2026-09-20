@@ -14,8 +14,12 @@ class HomeController extends Controller
     /**
      * Show the application dashboard.
      */
-    public function __invoke(): Factory|View|\Illuminate\View\View
+    public function __invoke(): Factory|View|\Illuminate\View\View|\Illuminate\Http\RedirectResponse
     {
+        if (auth()->user()->isSuperAdmin()) {
+            return redirect()->route('superadmin.stores.index');
+        }
+
         $orders = Order::with(['items', 'payments'])->get();
 
         return view('home', [
