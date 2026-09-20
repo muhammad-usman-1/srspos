@@ -11,8 +11,10 @@
     <!-- <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"> -->
     <!-- overlayScrollbars -->
     <!-- <link rel="stylesheet" href="{{ asset('css/app.css') }}"> -->
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <!-- Installable / offline-capable POS -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#343a40">
+    <link rel="icon" href="{{ asset('images/pwa-192.png') }}">
 
 
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
@@ -24,7 +26,10 @@
                             'enable_discount' => (bool) config('settings.enable_discount'),
                             'enable_tax' => (bool) config('settings.enable_tax'),
                             'tax_name' => config('settings.tax_name') ?: 'Tax',
-                            'tax_rate' => (float) config('settings.tax_rate', 0)
+                            'tax_rate' => (float) config('settings.tax_rate', 0),
+                            'user_id' => auth()->id(),
+                            'store_id' => auth()->user()->store_id,
+                            'cashier' => auth()->user()->getFullname()
                         ]) ?>
     </script>
 </head>
@@ -73,6 +78,23 @@
     <!-- <script src="{{ asset('js/app.js') }}"></script> -->
 
 
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js').catch(function () {});
+                // once the worker controls the page, re-request what this page already loaded so it is stored for offline use
+                navigator.serviceWorker.ready.then(function () {
+                    setTimeout(function () {
+                        performance.getEntriesByType('resource').forEach(function (r) {
+                            if (r.name.indexOf(location.origin) === 0 && /\.(js|css|woff2?|png|jpe?g|svg|gif|webp|ico)(\?|$)/i.test(r.name)) {
+                                fetch(r.name).catch(function () {});
+                            }
+                        });
+                    }, 1500);
+                });
+            });
+        }
+    </script>
     @yield('js')
     @yield('model')
 </body>

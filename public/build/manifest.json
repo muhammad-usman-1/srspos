@@ -1,4 +1,268 @@
 {
+  "node_modules/@fontsource/nunito/files/nunito-cyrillic-400-normal.woff2": {
+    "file": "assets/nunito-cyrillic-400-normal.e44e669f.woff2",
+    "src": "node_modules/@fontsource/nunito/files/nunito-cyrillic-400-normal.woff2"
+  },
+  "node_modules/@fontsource/nunito/files/nunito-vietnamese-400-normal.woff2": {
+    "file": "assets/nunito-vietnamese-400-normal.2a755616.woff2",
+    "src": "node_modules/@fontsource/nunito/files/nunito-vietnamese-400-normal.woff2"
+  },
+  "node_modules/@fontsource/nunito/files/nunito-latin-ext-400-normal.woff2": {
+    "file": "assets/nunito-latin-ext-400-normal.67250a41.woff2",
+    "src": "node_modules/@fontsource/nunito/files/nunito-latin-ext-400-normal.woff2"
+  },
+  "node_modules/@fontsource/nunito/files/nunito-cyrillic-ext-400-normal.woff2": {
+    "file": "assets/nunito-cyrillic-ext-400-normal.20d73ae7.woff2",
+    "src": "node_modules/@fontsource/nunito/files/nunito-cyrillic-ext-400-normal.woff2"
+  },
+  "node_modules/@fontsource/nunito/files/nunito-latin-400-normal.woff2": {
+    "file": "assets/nunito-latin-400-normal.a5906e15.woff2",
+    "src": "node_modules/@fontsource/nunito/files/nunito-latin-400-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-400-normal.woff2": {
+    "file": "assets/source-sans-pro-cyrillic-ext-400-normal.4ba425fa.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-400-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-400-normal.woff2": {
+    "file": "assets/source-sans-pro-cyrillic-400-normal.c73c9d26.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-400-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-400-normal.woff2": {
+    "file": "assets/source-sans-pro-greek-ext-400-normal.f2a19d8c.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-400-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-400-normal.woff2": {
+    "file": "assets/source-sans-pro-greek-400-normal.9755c83c.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-400-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-400-normal.woff2": {
+    "file": "assets/source-sans-pro-vietnamese-400-normal.de1f7870.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-400-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-400-normal.woff2": {
+    "file": "assets/source-sans-pro-latin-ext-400-normal.39cf9abc.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-400-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-400-normal.woff2": {
+    "file": "assets/source-sans-pro-latin-400-normal.7b348b30.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-400-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-300-normal.woff2": {
+    "file": "assets/source-sans-pro-greek-300-normal.1f78c0bf.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-300-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-300-normal.woff2": {
+    "file": "assets/source-sans-pro-cyrillic-ext-300-normal.17b49dff.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-300-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-300-normal.woff2": {
+    "file": "assets/source-sans-pro-greek-ext-300-normal.d021bc2d.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-300-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-300-normal.woff2": {
+    "file": "assets/source-sans-pro-vietnamese-300-normal.76888fca.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-300-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-300-normal.woff2": {
+    "file": "assets/source-sans-pro-latin-300-normal.c3de27b2.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-300-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-400-italic.woff2": {
+    "file": "assets/source-sans-pro-cyrillic-ext-400-italic.acb92e25.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-400-italic.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-300-normal.woff2": {
+    "file": "assets/source-sans-pro-latin-ext-300-normal.58533b4e.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-300-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-400-italic.woff2": {
+    "file": "assets/source-sans-pro-greek-400-italic.13d60ab4.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-400-italic.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-400-italic.woff2": {
+    "file": "assets/source-sans-pro-greek-ext-400-italic.b7674ffe.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-400-italic.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-400-italic.woff2": {
+    "file": "assets/source-sans-pro-vietnamese-400-italic.234746a2.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-400-italic.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-400-italic.woff2": {
+    "file": "assets/source-sans-pro-latin-400-italic.500f8aaf.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-400-italic.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-400-italic.woff2": {
+    "file": "assets/source-sans-pro-latin-ext-400-italic.b7c2c608.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-400-italic.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-300-normal.woff2": {
+    "file": "assets/source-sans-pro-cyrillic-300-normal.d6705923.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-300-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-400-italic.woff2": {
+    "file": "assets/source-sans-pro-cyrillic-400-italic.68aaacd9.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-400-italic.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-700-normal.woff2": {
+    "file": "assets/source-sans-pro-cyrillic-700-normal.2a775d51.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-700-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-700-normal.woff2": {
+    "file": "assets/source-sans-pro-greek-700-normal.f354e04e.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-700-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-700-normal.woff2": {
+    "file": "assets/source-sans-pro-greek-ext-700-normal.601e85e9.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-700-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-700-normal.woff2": {
+    "file": "assets/source-sans-pro-cyrillic-ext-700-normal.f06e0f86.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-700-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-700-normal.woff2": {
+    "file": "assets/source-sans-pro-vietnamese-700-normal.5a2f94cc.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-700-normal.woff2"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-700-normal.woff2": {
+    "file": "assets/source-sans-pro-latin-700-normal.0d0a6262.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-700-normal.woff2"
+  },
+  "node_modules/@fontsource/nunito/files/nunito-vietnamese-400-normal.woff": {
+    "file": "assets/nunito-vietnamese-400-normal.9c01ea9f.woff",
+    "src": "node_modules/@fontsource/nunito/files/nunito-vietnamese-400-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-700-normal.woff2": {
+    "file": "assets/source-sans-pro-latin-ext-700-normal.22982053.woff2",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-700-normal.woff2"
+  },
+  "node_modules/@fontsource/nunito/files/nunito-cyrillic-400-normal.woff": {
+    "file": "assets/nunito-cyrillic-400-normal.ff8e8bdd.woff",
+    "src": "node_modules/@fontsource/nunito/files/nunito-cyrillic-400-normal.woff"
+  },
+  "node_modules/@fontsource/nunito/files/nunito-latin-ext-400-normal.woff": {
+    "file": "assets/nunito-latin-ext-400-normal.d7e2415e.woff",
+    "src": "node_modules/@fontsource/nunito/files/nunito-latin-ext-400-normal.woff"
+  },
+  "node_modules/@fontsource/nunito/files/nunito-cyrillic-ext-400-normal.woff": {
+    "file": "assets/nunito-cyrillic-ext-400-normal.d48c37c9.woff",
+    "src": "node_modules/@fontsource/nunito/files/nunito-cyrillic-ext-400-normal.woff"
+  },
+  "node_modules/@fontsource/nunito/files/nunito-latin-400-normal.woff": {
+    "file": "assets/nunito-latin-400-normal.b51e7635.woff",
+    "src": "node_modules/@fontsource/nunito/files/nunito-latin-400-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-400-normal.woff": {
+    "file": "assets/source-sans-pro-cyrillic-ext-400-normal.86893cf4.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-400-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-400-normal.woff": {
+    "file": "assets/source-sans-pro-cyrillic-400-normal.d6072cf4.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-400-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-400-normal.woff": {
+    "file": "assets/source-sans-pro-greek-ext-400-normal.c267e677.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-400-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-400-normal.woff": {
+    "file": "assets/source-sans-pro-greek-400-normal.586ab659.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-400-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-400-normal.woff": {
+    "file": "assets/source-sans-pro-vietnamese-400-normal.bb1c0391.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-400-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-400-normal.woff": {
+    "file": "assets/source-sans-pro-latin-ext-400-normal.2ffb1c70.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-400-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-300-normal.woff": {
+    "file": "assets/source-sans-pro-cyrillic-ext-300-normal.3d45c206.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-300-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-400-normal.woff": {
+    "file": "assets/source-sans-pro-latin-400-normal.69491b82.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-400-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-300-normal.woff": {
+    "file": "assets/source-sans-pro-greek-ext-300-normal.6f804185.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-300-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-300-normal.woff": {
+    "file": "assets/source-sans-pro-greek-300-normal.3e1f9121.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-300-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-400-italic.woff": {
+    "file": "assets/source-sans-pro-greek-400-italic.e3e8e77e.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-400-italic.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-400-italic.woff": {
+    "file": "assets/source-sans-pro-cyrillic-ext-400-italic.1d8890ca.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-400-italic.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-400-italic.woff": {
+    "file": "assets/source-sans-pro-greek-ext-400-italic.5f7e3238.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-400-italic.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-300-normal.woff": {
+    "file": "assets/source-sans-pro-vietnamese-300-normal.41325b23.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-300-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-400-italic.woff": {
+    "file": "assets/source-sans-pro-vietnamese-400-italic.591709ee.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-400-italic.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-300-normal.woff": {
+    "file": "assets/source-sans-pro-latin-300-normal.d40268ea.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-300-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-300-normal.woff": {
+    "file": "assets/source-sans-pro-latin-ext-300-normal.bed8be6d.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-300-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-400-italic.woff": {
+    "file": "assets/source-sans-pro-latin-ext-400-italic.1d75f53b.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-400-italic.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-400-italic.woff": {
+    "file": "assets/source-sans-pro-latin-400-italic.c3707996.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-400-italic.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-300-normal.woff": {
+    "file": "assets/source-sans-pro-cyrillic-300-normal.fa81e245.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-300-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-400-italic.woff": {
+    "file": "assets/source-sans-pro-cyrillic-400-italic.e40cf78d.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-400-italic.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-700-normal.woff": {
+    "file": "assets/source-sans-pro-cyrillic-700-normal.d92a752f.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-700-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-700-normal.woff": {
+    "file": "assets/source-sans-pro-greek-700-normal.6999e985.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-700-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-700-normal.woff": {
+    "file": "assets/source-sans-pro-cyrillic-ext-700-normal.502b48f6.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-cyrillic-ext-700-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-700-normal.woff": {
+    "file": "assets/source-sans-pro-greek-ext-700-normal.675fbcb3.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-greek-ext-700-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-700-normal.woff": {
+    "file": "assets/source-sans-pro-vietnamese-700-normal.67281852.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-vietnamese-700-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-700-normal.woff": {
+    "file": "assets/source-sans-pro-latin-ext-700-normal.757acac5.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-ext-700-normal.woff"
+  },
+  "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-700-normal.woff": {
+    "file": "assets/source-sans-pro-latin-700-normal.bcc2a2ed.woff",
+    "src": "node_modules/@fontsource/source-sans-pro/files/source-sans-pro-latin-700-normal.woff"
+  },
   "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2": {
     "file": "assets/fa-solid-900.d27bc752.woff2",
     "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2"
@@ -16,12 +280,87 @@
     "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf"
   },
   "resources/js/app.js": {
-    "file": "assets/app.57f13962.js",
+    "file": "assets/app.9f7fcd91.js",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "css": [
+      "assets/app.abc09b48.css"
+    ],
+    "assets": [
+      "assets/source-sans-pro-cyrillic-ext-300-normal.17b49dff.woff2",
+      "assets/source-sans-pro-cyrillic-ext-300-normal.3d45c206.woff",
+      "assets/source-sans-pro-cyrillic-300-normal.d6705923.woff2",
+      "assets/source-sans-pro-cyrillic-300-normal.fa81e245.woff",
+      "assets/source-sans-pro-greek-ext-300-normal.d021bc2d.woff2",
+      "assets/source-sans-pro-greek-ext-300-normal.6f804185.woff",
+      "assets/source-sans-pro-greek-300-normal.1f78c0bf.woff2",
+      "assets/source-sans-pro-greek-300-normal.3e1f9121.woff",
+      "assets/source-sans-pro-vietnamese-300-normal.76888fca.woff2",
+      "assets/source-sans-pro-vietnamese-300-normal.41325b23.woff",
+      "assets/source-sans-pro-latin-ext-300-normal.58533b4e.woff2",
+      "assets/source-sans-pro-latin-ext-300-normal.bed8be6d.woff",
+      "assets/source-sans-pro-latin-300-normal.c3de27b2.woff2",
+      "assets/source-sans-pro-latin-300-normal.d40268ea.woff",
+      "assets/source-sans-pro-cyrillic-ext-400-normal.4ba425fa.woff2",
+      "assets/source-sans-pro-cyrillic-ext-400-normal.86893cf4.woff",
+      "assets/source-sans-pro-cyrillic-400-normal.c73c9d26.woff2",
+      "assets/source-sans-pro-cyrillic-400-normal.d6072cf4.woff",
+      "assets/source-sans-pro-greek-ext-400-normal.f2a19d8c.woff2",
+      "assets/source-sans-pro-greek-ext-400-normal.c267e677.woff",
+      "assets/source-sans-pro-greek-400-normal.9755c83c.woff2",
+      "assets/source-sans-pro-greek-400-normal.586ab659.woff",
+      "assets/source-sans-pro-vietnamese-400-normal.de1f7870.woff2",
+      "assets/source-sans-pro-vietnamese-400-normal.bb1c0391.woff",
+      "assets/source-sans-pro-latin-ext-400-normal.39cf9abc.woff2",
+      "assets/source-sans-pro-latin-ext-400-normal.2ffb1c70.woff",
+      "assets/source-sans-pro-latin-400-normal.7b348b30.woff2",
+      "assets/source-sans-pro-latin-400-normal.69491b82.woff",
+      "assets/source-sans-pro-cyrillic-ext-400-italic.acb92e25.woff2",
+      "assets/source-sans-pro-cyrillic-ext-400-italic.1d8890ca.woff",
+      "assets/source-sans-pro-cyrillic-400-italic.68aaacd9.woff2",
+      "assets/source-sans-pro-cyrillic-400-italic.e40cf78d.woff",
+      "assets/source-sans-pro-greek-ext-400-italic.b7674ffe.woff2",
+      "assets/source-sans-pro-greek-ext-400-italic.5f7e3238.woff",
+      "assets/source-sans-pro-greek-400-italic.13d60ab4.woff2",
+      "assets/source-sans-pro-greek-400-italic.e3e8e77e.woff",
+      "assets/source-sans-pro-vietnamese-400-italic.234746a2.woff2",
+      "assets/source-sans-pro-vietnamese-400-italic.591709ee.woff",
+      "assets/source-sans-pro-latin-ext-400-italic.b7c2c608.woff2",
+      "assets/source-sans-pro-latin-ext-400-italic.1d75f53b.woff",
+      "assets/source-sans-pro-latin-400-italic.500f8aaf.woff2",
+      "assets/source-sans-pro-latin-400-italic.c3707996.woff",
+      "assets/source-sans-pro-cyrillic-ext-700-normal.f06e0f86.woff2",
+      "assets/source-sans-pro-cyrillic-ext-700-normal.502b48f6.woff",
+      "assets/source-sans-pro-cyrillic-700-normal.2a775d51.woff2",
+      "assets/source-sans-pro-cyrillic-700-normal.d92a752f.woff",
+      "assets/source-sans-pro-greek-ext-700-normal.601e85e9.woff2",
+      "assets/source-sans-pro-greek-ext-700-normal.675fbcb3.woff",
+      "assets/source-sans-pro-greek-700-normal.f354e04e.woff2",
+      "assets/source-sans-pro-greek-700-normal.6999e985.woff",
+      "assets/source-sans-pro-vietnamese-700-normal.5a2f94cc.woff2",
+      "assets/source-sans-pro-vietnamese-700-normal.67281852.woff",
+      "assets/source-sans-pro-latin-ext-700-normal.22982053.woff2",
+      "assets/source-sans-pro-latin-ext-700-normal.757acac5.woff",
+      "assets/source-sans-pro-latin-700-normal.0d0a6262.woff2",
+      "assets/source-sans-pro-latin-700-normal.bcc2a2ed.woff",
+      "assets/nunito-cyrillic-ext-400-normal.20d73ae7.woff2",
+      "assets/nunito-cyrillic-ext-400-normal.d48c37c9.woff",
+      "assets/nunito-cyrillic-400-normal.e44e669f.woff2",
+      "assets/nunito-cyrillic-400-normal.ff8e8bdd.woff",
+      "assets/nunito-vietnamese-400-normal.2a755616.woff2",
+      "assets/nunito-vietnamese-400-normal.9c01ea9f.woff",
+      "assets/nunito-latin-ext-400-normal.67250a41.woff2",
+      "assets/nunito-latin-ext-400-normal.d7e2415e.woff",
+      "assets/nunito-latin-400-normal.a5906e15.woff2",
+      "assets/nunito-latin-400-normal.b51e7635.woff"
+    ]
+  },
+  "resources/js/app.css": {
+    "file": "assets/app.abc09b48.css",
+    "src": "resources/js/app.css"
   },
   "resources/sass/app.scss": {
-    "file": "assets/app.df78aad0.css",
+    "file": "assets/app.30dfc5e2.css",
     "src": "resources/sass/app.scss",
     "isEntry": true
   }

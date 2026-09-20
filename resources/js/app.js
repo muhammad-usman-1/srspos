@@ -4,6 +4,11 @@
  * building robust, powerful web applications using React + Laravel.
  */
 
+import "../../node_modules/@fontsource/source-sans-pro/300.css";
+import "../../node_modules/@fontsource/source-sans-pro/400.css";
+import "../../node_modules/@fontsource/source-sans-pro/400-italic.css";
+import "../../node_modules/@fontsource/source-sans-pro/700.css";
+import "../../node_modules/@fontsource/nunito/400.css";
 import "./bootstrap";
 
 /**

@@ -11,6 +11,7 @@ use App\Http\Controllers\Management\CustomerController;
 use App\Http\Controllers\Management\SupplierController;
 use App\Http\Controllers\Pos\CartController;
 use App\Http\Controllers\Pos\OrderController;
+use App\Http\Controllers\Pos\PosSyncController;
 use App\Http\Controllers\Settings\SettingController;
 use App\Http\Controllers\SuperAdmin\StoreController;
 use Illuminate\Http\RedirectResponse;
@@ -59,6 +60,10 @@ Route::prefix('admin')->middleware(['auth', 'locale', 'store.access'])->group(fu
         Route::delete('/delete', [PurchaseCartController::class, 'delete'])->name('delete');
         Route::delete('/empty', [PurchaseCartController::class, 'empty'])->name('empty');
     });
+
+    // Offline-capable POS
+    Route::get('/pos/bootstrap', [PosSyncController::class, 'bootstrap'])->name('pos.bootstrap');
+    Route::post('/pos/sales', [PosSyncController::class, 'sales'])->name('pos.sales');
 
     // Held bills
     Route::get('/held-bills', [HeldBillController::class, 'index'])->name('held-bills.index');

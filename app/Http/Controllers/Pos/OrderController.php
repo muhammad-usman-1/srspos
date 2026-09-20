@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Order\OrderStoreRequest;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -30,61 +31,27 @@ class OrderController extends Controller
         return view('orders.index', ['orders' => $orders, 'total' => $total, 'receivedAmount' => $receivedAmount]);
     }
 
-    public function store(OrderStoreRequest $request): \Illuminate\Http\JsonResponse
+    public function store(OrderStoreRequest $request, OrderService $orders): \Illuminate\Http\JsonResponse
     {
         try {
-            $order = DB::transaction(function () use ($request) {
-                // Create order
-                $order = Order::create([
-                    'customer_id' => $request->customer_id,
-                    'user_id' => $request->user()->id,
-                ]);
+            $cartItems = $request->user()->cart()->get();
+            if ($cartItems->isEmpty()) {
+                throw new \Exception(__('cart.empty'));
+            }
 
-                // Get cart items
-                $cartItems = $request->user()->cart()->get();
-
-                if ($cartItems->isEmpty()) {
-                    throw new \Exception(__('cart.empty'));
-                }
-
-                // Create order items and update product quantities
-                $orderTotal = 0.0;
-                foreach ($cartItems as $item) {
-                    if ($item->quantity < $item->pivot->quantity) {
-                        throw new \Exception(__('cart.available', ['quantity' => $item->quantity]) . ' (' . $item->name . ')');
-                    }
-                    $this->createOrderItem($order, $item);
-                    $this->reduceProductStock($item, $order);
-                    $orderTotal += $item->price * $item->pivot->quantity;
-                }
-
-                // Discount and tax (only when the admin has enabled them in Settings)
-                $subtotal = round($orderTotal, 2);
-                $discount = 0.0;
-                if (config('settings.enable_discount') && $request->filled('discount_value')) {
-                    $value = (float) $request->discount_value;
-                    $discount = $request->input('discount_type') === 'percent' ? $subtotal * min($value, 100) / 100 : $value;
-                    $discount = round(min($discount, $subtotal), 2);
-                }
-                $taxRate = config('settings.enable_tax') ? (float) $request->input('tax_rate', config('settings.tax_rate', 0)) : 0.0;
-                $taxAmount = round(($subtotal - $discount) * $taxRate / 100, 2);
-                $grandTotal = round($subtotal - $discount + $taxAmount, 2);
-                $order->update(['discount' => $discount, 'tax_rate' => $taxRate, 'tax_amount' => $taxAmount]);
-
-                // Clear cart
-                $request->user()->cart()->detach();
-
-                // Create payment
-                $order->payments()->create([
-                    // Cash handed over beyond the bill is change, not revenue.
-                    'amount' => min((float) $request->amount, $grandTotal),
-                    'method' => $request->input('method', 'cash') ?: 'cash',
-                    'tendered' => (float) $request->amount,
-                    'user_id' => $request->user()->id,
-                ]);
-
-                return $order;
-            });
+            $order = $orders->create($request->user(), [
+                'customer_id' => $request->customer_id,
+                'method' => $request->input('method', 'cash') ?: 'cash',
+                'amount' => $request->amount,
+                'discount_type' => $request->input('discount_type'),
+                'discount_value' => $request->input('discount_value'),
+                'tax_rate' => $request->input('tax_rate'),
+                'items' => $cartItems->map(fn($p): array => [
+                    'product_id' => $p->id,
+                    'quantity' => (int) $p->pivot->quantity,
+                ])->all(),
+            ]);
+            $request->user()->cart()->detach();
 
             return response()->json([
                 'success' => true,
@@ -98,7 +65,6 @@ class OrderController extends Controller
             ], 400);
         }
     }
-
     public function partialPayment(Request $request)
     {
         $order = Order::findOrFail($request->input('order_id'));
@@ -121,27 +87,6 @@ class OrderController extends Controller
             ->with('success', __('order.partial_payment_success', [
                 'amount' => config('settings.currency_symbol') . number_format($request->amount, 2)
             ]));
-    }
-
-    /**
-     * Create an order item from cart item.
-     */
-    private function createOrderItem(Order $order, $item): void
-    {
-        $order->items()->create([
-            'price' => $item->price * $item->pivot->quantity,
-            'mkt_price' => $item->mkt_price,
-            'quantity' => $item->pivot->quantity,
-            'product_id' => $item->id,
-        ]);
-    }
-
-    /**
-     * Reduce product stock based on cart quantity.
-     */
-    private function reduceProductStock($item, Order $order): void
-    {
-        $item->adjustStock(-$item->pivot->quantity, 'sale', 'Order #' . $order->id);
     }
 
     /**
