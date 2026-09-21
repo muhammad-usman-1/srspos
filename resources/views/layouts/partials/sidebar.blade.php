@@ -1,9 +1,11 @@
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="{{route('home')}}" class="brand-link">
-        <img src="{{ app_logo_url() }}" alt="AdminLTE Logo" class="brand-image" style="opacity:.95;object-fit:contain;max-height:33px;width:auto">
-        <span class="brand-text font-weight-light">{{ config('app.name') }}</span>
+    <a href="{{route('home')}}" class="brand-link" style="background:#fff;display:flex;align-items:center;justify-content:center;padding:8px 12px;height:57px">
+        <img src="{{ app_logo_url() }}" alt="{{ config('app.name') }}" style="object-fit:contain;max-height:38px;max-width:100%;width:auto">
+        @if(has_custom_logo())
+            <span class="ml-2 font-weight-bold" style="color:#212529">{{ config('app.name') }}</span>
+        @endif
     </a>
 
     <!-- Sidebar -->

@@ -18,6 +18,18 @@ if (!function_exists('app_logo_url')) {
             return \Illuminate\Support\Facades\Storage::disk('public')->url($logo);
         }
 
-        return asset('images/logo.png');
+        return asset('images/srspos.png');
+    }
+}
+
+if (!function_exists('has_custom_logo')) {
+    /**
+     * True when the store uploaded its own logo in Settings (otherwise the bundled SRSPOS logo is used).
+     */
+    function has_custom_logo(): bool
+    {
+        $logo = config('settings.logo');
+
+        return $logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($logo);
     }
 }

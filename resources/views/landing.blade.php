@@ -21,7 +21,7 @@
         header.nav { position: sticky; top: 0; z-index: 10; background: rgba(255,255,255,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
         .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
         .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
-        .brand img { height: 34px; width: auto; }
+        .brand img { height: 40px; width: auto; }
         .nav nav { display: flex; align-items: center; gap: 26px; font-size: 15px; color: var(--muted); }
         .nav nav a:hover { color: var(--ink); }
         .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 10px; font-weight: 600; font-size: 15px; border: 1px solid transparent; cursor: pointer; transition: .15s; }
@@ -98,7 +98,7 @@
 
 <header class="nav">
     <div class="wrap">
-        <a href="/" class="brand"><img src="{{ app_logo_url() }}" alt=""> {{ config('app.name') }}</a>
+        <a href="/" class="brand"><img src="{{ app_logo_url() }}" alt="{{ config('app.name') }}">@if(has_custom_logo()) {{ config('app.name') }}@endif</a>
         <nav>
             <a class="link" href="#features">Features</a>
             <a class="link" href="#offline">Works offline</a>

@@ -19,7 +19,7 @@
 <body class="hold-transition login-page">
     <div class="login-box">
         <div class="login-logo">
-            <a href="/"><img src="{{ app_logo_url() }}" alt="" style="max-height:70px;display:block;margin:0 auto 8px">{{ config('app.name') }}</a>
+            <a href="/"><img src="{{ app_logo_url() }}" alt="{{ config('app.name') }}" style="max-height:80px;max-width:100%;display:block;margin:0 auto 8px">@if(has_custom_logo()){{ config('app.name') }}@endif</a>
         </div>
         <!-- /.login-logo -->
         <div class="card">
