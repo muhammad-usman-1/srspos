@@ -105,7 +105,7 @@ table{width:100%;border-collapse:collapse}
 </style></head><body>
 <div class="center">
   ${s.logo_url ? `<img class="logo" src="${esc(s.logo_url)}" alt="">` : ""}
-  ${s.store_address ? `<div class="address">${esc(s.store_address)}</div>` : `<div class="b" style="font-size:15px">${esc(s.app_name)}</div>`}
+  ${s.store_address ? `<div class="address">${esc(s.store_address)}</div>` : ""}
   ${s.store_phone ? `<div class="phone">Ph: ${esc(s.store_phone)}</div>` : ""}
   <div class="title">${esc((s.receipt_title || "Original Sales Invoice").toUpperCase())}</div>
 </div>

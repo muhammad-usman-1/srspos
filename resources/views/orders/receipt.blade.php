@@ -61,9 +61,6 @@
 @endphp
     <div class="center">
         <img class="logo" src="{{ app_logo_url() }}" alt="">
-        @if(!$address)
-            <div class="b" style="font-size:15px">{{ config('app.name') }}</div>
-        @endif
         @if($address)<div class="address">{{ $address }}</div>@endif
         @if($phone)<div class="phone">Ph: {{ $phone }}</div>@endif
         <div class="title">{{ strtoupper(config('settings.receipt_title') ?: 'Original Sales Invoice') }}</div>
