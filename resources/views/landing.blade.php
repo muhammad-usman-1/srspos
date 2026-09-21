@@ -47,7 +47,18 @@
         h2 { font-size: clamp(1.6rem, 3vw, 2.3rem); letter-spacing: -.01em; line-height: 1.2; margin-bottom: 12px; }
         .sub { color: var(--muted); max-width: 640px; font-size: 1.05rem; margin-bottom: 40px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
-        .card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+        .card { position: relative; overflow: hidden; z-index: 0; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px; cursor: default;
+            transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
+        /* colour floods in from the bottom-left on hover */
+        .card::before { content: ""; position: absolute; z-index: -1; left: 0; bottom: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #2563eb, #1e40af);
+            transform: scaleY(0); transform-origin: bottom; transition: transform .35s ease; }
+        .card:hover { transform: translateY(-6px); border-color: transparent; box-shadow: 0 18px 36px -14px rgba(37, 99, 235, .55); }
+        .card:hover::before { transform: scaleY(1); }
+        .card h3, .card p, .card .ic { transition: color .3s ease, background .3s ease, transform .3s ease; }
+        .card:hover h3 { color: #fff; }
+        .card:hover p { color: #dbeafe; }
+        .card:hover .ic { background: rgba(255,255,255,.18); color: #fff; transform: scale(1.08) rotate(-4deg); }
+        @media (prefers-reduced-motion: reduce) { .card, .card::before, .card h3, .card p, .card .ic { transition: none; } .card:hover { transform: none; } }
         .card .ic { width: 44px; height: 44px; border-radius: 10px; background: #eff6ff; color: var(--brand); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
         .card svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .card h3 { font-size: 1.05rem; margin-bottom: 6px; }
