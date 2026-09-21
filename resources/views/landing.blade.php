@@ -31,31 +31,14 @@
         .btn-ghost:hover { border-color: #cbd5e1; background: var(--soft); }
 
         /* hero */
-        .hero { background: radial-gradient(1200px 500px at 80% -10%, #dbeafe 0%, transparent 60%), linear-gradient(180deg, #f8fafc, #fff); padding: 72px 0 56px; }
-        .hero .wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+        .hero { background: radial-gradient(1200px 500px at 80% -10%, #dbeafe 0%, transparent 60%), linear-gradient(180deg, #f8fafc, #fff); padding: 84px 0 76px; }
+        .hero .wrap { text-align: center; max-width: 900px; }
         .pill { display: inline-block; background: #dcfce7; color: #166534; font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: 999px; margin-bottom: 18px; }
-        h1 { font-size: clamp(2rem, 4.4vw, 3.3rem); line-height: 1.12; letter-spacing: -.02em; margin-bottom: 18px; }
+        h1 { font-size: clamp(2.1rem, 5vw, 3.6rem); line-height: 1.12; letter-spacing: -.02em; margin-bottom: 18px; }
         h1 span { color: var(--brand); }
-        .lead { font-size: 1.15rem; color: var(--muted); max-width: 540px; margin-bottom: 28px; }
-        .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+        .lead { font-size: 1.2rem; color: var(--muted); max-width: 680px; margin: 0 auto 30px; }
+        .cta { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
         .note { margin-top: 14px; font-size: 13px; color: var(--muted); }
-
-        /* mock POS */
-        .mock { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 24px 60px -20px rgba(15,23,42,.25); overflow: hidden; }
-        .mock .bar { display: flex; gap: 6px; padding: 10px 14px; background: #f1f5f9; border-bottom: 1px solid var(--line); align-items: center; }
-        .mock .bar i { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; display: block; }
-        .mock .bar .st { margin-left: auto; font-size: 11px; font-weight: 700; color: #166534; background: #dcfce7; padding: 2px 8px; border-radius: 999px; }
-        .mock .body { display: grid; grid-template-columns: 1.15fr 1fr; }
-        .mock .tiles { padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-content: start; }
-        .tile { border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 8px 10px; font-size: 12px; }
-        .tile.low { border-left-color: #f59e0b; }
-        .tile b { display: block; font-size: 12.5px; }
-        .tile span { color: var(--brand); font-weight: 700; }
-        .tile small { float: right; color: var(--muted); }
-        .mock .cart { border-left: 1px solid var(--line); padding: 14px; background: var(--soft); font-size: 12.5px; }
-        .mock .cart .row { display: flex; justify-content: space-between; padding: 4px 0; }
-        .mock .cart .tot { border-top: 1px dashed #cbd5e1; margin-top: 8px; padding-top: 8px; font-weight: 700; font-size: 15px; }
-        .mock .cart .pay { margin-top: 10px; background: var(--brand); color: #fff; text-align: center; padding: 9px; border-radius: 8px; font-weight: 700; }
 
         /* sections */
         section { padding: 72px 0; }
@@ -93,9 +76,9 @@
         footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
 
         @media (max-width: 900px) {
-            .hero .wrap, .offline { grid-template-columns: 1fr; }
+            .offline { grid-template-columns: 1fr; }
             .nav nav .link { display: none; }
-            .hero { padding-top: 40px; }
+            .hero { padding: 48px 0 56px; }
         }
     </style>
 </head>
@@ -137,26 +120,6 @@
                 <p class="note">New stores are set up by the system owner.</p>
             </div>
 
-            <div class="mock" aria-hidden="true">
-                <div class="bar"><i></i><i></i><i></i><span class="st">● Online</span></div>
-                <div class="body">
-                    <div class="tiles">
-                        <div class="tile"><b>Milk 1L</b><span>PKR 150</span><small>80 left</small></div>
-                        <div class="tile"><b>White Bread</b><span>PKR 140</span><small>50 left</small></div>
-                        <div class="tile"><b>Cooking Oil 1L</b><span>PKR 320</span><small>55 left</small></div>
-                        <div class="tile low"><b>Notebook A5</b><span>PKR 120</span><small>8 left</small></div>
-                        <div class="tile"><b>Tea Bags (100)</b><span>PKR 330</span><small>45 left</small></div>
-                        <div class="tile"><b>Bath Soap</b><span>PKR 90</span><small>140 left</small></div>
-                    </div>
-                    <div class="cart">
-                        <div class="row"><span>Milk 1L × 2</span><span>300</span></div>
-                        <div class="row"><span>White Bread × 1</span><span>140</span></div>
-                        <div class="row"><span>Tea Bags × 1</span><span>330</span></div>
-                        <div class="row tot"><span>Total</span><span>PKR 770</span></div>
-                        <div class="pay">Checkout</div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
