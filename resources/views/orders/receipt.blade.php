@@ -76,17 +76,15 @@
 
     <table class="items">
         <colgroup>
-            <col style="width:35%"><col style="width:13%"><col style="width:13%"><col style="width:19%"><col style="width:20%">
+            <col style="width:46%"><col style="width:17%"><col style="width:17%"><col style="width:20%">
         </colgroup>
         <thead>
         <tr>
             <th class="l" colspan="3">No. &nbsp;Item Name / Barcode</th>
-            <th>MKT Price</th>
             <th>Amount</th>
         </tr>
         <tr>
             <th class="l"></th>
-            <th>GST %</th>
             <th>Qty</th>
             <th>Price</th>
             <th></th>
@@ -97,12 +95,10 @@
             @php $unit = $item->quantity ? $item->price / $item->quantity : 0; @endphp
             <tr>
                 <td class="l name" colspan="3">{{ $i + 1 }}. {{ $item->product->name ?? 'Item' }}</td>
-                <td>{{ $item->mkt_price !== null ? $n($item->mkt_price) : '' }}</td>
                 <td class="b">{{ $n($item->price) }}</td>
             </tr>
             <tr class="sep">
                 <td class="l">{{ $item->product->barcode ?? '' }}</td>
-                <td>{{ $gstRate > 0 ? rtrim(rtrim($n($gstRate), '0'), '.') . '%' : '%' }}</td>
                 <td>{{ $n($item->quantity) }}</td>
                 <td>{{ $n($unit) }}</td>
                 <td></td>
@@ -124,10 +120,6 @@
         @endif
     </table>
 
-    <table class="box">
-        <tr><td>Market Total</td><td class="dark">{{ $n($marketTotal) }}</td></tr>
-        <tr><td>GST This Bill</td><td>{{ $n($order->tax_amount) }}</td></tr>
-    </table>
 
     @if($policy)<div class="policy">{{ $policy }}</div>@endif
     <div class="thanks">{{ strtoupper($footer) }}</div>

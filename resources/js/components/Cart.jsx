@@ -72,13 +72,11 @@ function buildReceiptHtml(sale, billNo, s, cashier) {
     const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
     const tendered = Number(sale.amount) || 0;
     const due = Math.max(t.total - tendered, 0);
-    const marketTotal = sale.items.reduce((sum, i) => sum + (i.mkt_price ?? i.price) * i.qty, 0);
-    const gst = t.rate > 0 ? `${parseFloat(t.rate)}%` : "%";
     const rows = sale.items
         .map(
             (i, idx) => `
-        <tr><td class="l name" colspan="3">${idx + 1}. ${esc(i.name)}</td><td>${i.mkt_price != null ? n(i.mkt_price) : ""}</td><td class="b">${n(i.price * i.qty)}</td></tr>
-        <tr class="sep"><td class="l">${esc(i.barcode)}</td><td>${gst}</td><td>${n(i.qty)}</td><td>${n(i.price)}</td><td></td></tr>`
+        <tr><td class="l name" colspan="3">${idx + 1}. ${esc(i.name)}</td><td class="b">${n(i.price * i.qty)}</td></tr>
+        <tr class="sep"><td class="l">${esc(i.barcode)}</td><td>${n(i.qty)}</td><td>${n(i.price)}</td><td></td></tr>`
         )
         .join("");
 
@@ -114,16 +112,15 @@ table{width:100%;border-collapse:collapse}
 <div class="meta"><span>Date &amp; Time: ${date}</span><span>${time}</span></div>
 <div class="meta"><span>Cashier: ${esc(cashier)}</span><span>Bill No: <b>${esc(billNo)}</b></span></div>
 ${sale.customer_name ? `<div class="meta"><span>Customer: ${esc(sale.customer_name)}</span></div>` : ""}
-<table class="items"><colgroup><col style="width:35%"><col style="width:13%"><col style="width:13%"><col style="width:19%"><col style="width:20%"></colgroup>
-<thead><tr><th class="l" colspan="3">No. &nbsp;Item Name / Barcode</th><th>MKT Price</th><th>Amount</th></tr>
-<tr><th class="l"></th><th>GST %</th><th>Qty</th><th>Price</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+<table class="items"><colgroup><col style="width:46%"><col style="width:17%"><col style="width:17%"><col style="width:20%"></colgroup>
+<thead><tr><th class="l" colspan="3">No. &nbsp;Item Name / Barcode</th><th>Amount</th></tr>
+<tr><th class="l"></th><th>Qty</th><th>Price</th><th></th></tr></thead><tbody>${rows}</tbody></table>
 <table class="totals" style="margin-top:4px">
   ${t.discount > 0 ? `<tr><td class="s">Discount</td><td class="r s">- ${n(t.discount)}</td></tr>` : ""}
   <tr><td>Grand Total</td><td class="r">${n(t.total)}</td></tr>
   <tr><td>${esc(METHODS[sale.method] || "Cash")} Paid</td><td class="r">${n(tendered)}</td></tr>
   ${due > 0 ? `<tr><td>Amount Due</td><td class="r">${n(due)}</td></tr>` : `<tr><td>Balance</td><td class="r">${n(Math.max(tendered - t.total, 0))}</td></tr>`}
 </table>
-<table class="box"><tr><td>Market Total</td><td class="dark">${n(marketTotal)}</td></tr><tr><td>GST This Bill</td><td>${n(t.tax)}</td></tr></table>
 ${s.receipt_policy ? `<div class="policy">${esc(s.receipt_policy)}</div>` : ""}
 <div class="thanks">${esc((s.receipt_footer || "Thanks for your visit").toUpperCase())}</div>
 ${s.receipt_credit ? `<div class="credit">${esc(s.receipt_credit)}</div>` : ""}
