@@ -13,6 +13,13 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
+        /* light-blue custom scrollbar */
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: #eff6ff; }
+        ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; border: 3px solid #eff6ff; }
+        ::-webkit-scrollbar-thumb:hover { background: #60a5fa; }
+        ::-webkit-scrollbar-corner { background: #eff6ff; }
+        @supports not selector(::-webkit-scrollbar) { * { scrollbar-width: thin; scrollbar-color: #93c5fd #eff6ff; } }
         body { font-family: "Source Sans Pro", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
         a { color: inherit; text-decoration: none; }
         .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
