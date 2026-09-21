@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $brand }} – Point of Sale that never stops selling</title>
     <meta name="description" content="Billing, stock, purchases and receipts in one place. Keeps working even when the internet goes down.">
-    <link rel="icon" href="{{ asset('images/pwa-192.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/srsfavicon.svg') }}">
     <style>
         :root {
             --ink: #0f172a; --muted: #475569; --line: #e2e8f0; --bg: #ffffff; --soft: #f8fafc;

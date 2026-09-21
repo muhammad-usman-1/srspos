@@ -14,7 +14,7 @@
     <!-- Installable / offline-capable POS -->
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#343a40">
-    <link rel="icon" href="{{ asset('images/pwa-192.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/srsfavicon.svg') }}">
 
 
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
