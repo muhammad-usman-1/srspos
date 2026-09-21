@@ -50,8 +50,10 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => env('APP_URL') . '/storage',
+            // Files are written straight into public/storage, so no `storage:link` symlink is needed
+            // (shared hosts like Hostinger disable symlink()/exec()).
+            'root' => public_path('storage'),
+            'url' => '/storage',
             'visibility' => 'public',
         ],
 
