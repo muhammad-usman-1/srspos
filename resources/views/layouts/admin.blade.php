@@ -14,6 +14,10 @@
     <!-- Installable / offline-capable POS -->
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#343a40">
+    <script>
+        // catch the browser's install offer as early as possible (it can fire before the app bundle loads)
+        window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__installPrompt = e; });
+    </script>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/srsfavicon.svg') }}">
 
 
