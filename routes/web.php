@@ -19,7 +19,8 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn(): Redirector|RedirectResponse => redirect('/admin'));
+// Public landing page
+Route::view('/', 'landing')->name('landing');
 
 Auth::routes(['register' => false]);
 

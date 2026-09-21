@@ -191,6 +191,7 @@ class Cart extends Component {
         this.refreshFromServer = this.refreshFromServer.bind(this);
         this.setOnline = this.setOnline.bind(this);
         this.onInstallPrompt = this.onInstallPrompt.bind(this);
+        this.onInstalled = () => this.setState({ installed: true });
     }
 
     componentDidMount() {
@@ -198,6 +199,7 @@ class Cart extends Component {
         window.addEventListener("online", this.setOnline);
         window.addEventListener("offline", this.setOnline);
         window.addEventListener("beforeinstallprompt", this.onInstallPrompt);
+        window.addEventListener("appinstalled", this.onInstalled);
         if (this.barcodeRef.current) this.barcodeRef.current.focus();
 
         this.refreshFromServer();
@@ -215,6 +217,7 @@ class Cart extends Component {
         window.removeEventListener("online", this.setOnline);
         window.removeEventListener("offline", this.setOnline);
         window.removeEventListener("beforeinstallprompt", this.onInstallPrompt);
+        window.removeEventListener("appinstalled", this.onInstalled);
         clearInterval(this.timer);
     }
 
@@ -356,12 +359,42 @@ class Cart extends Component {
         });
     }
 
+    isInstalled() {
+        return (
+            this.state.installed ||
+            (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+            window.navigator.standalone === true
+        );
+    }
+
     async handleInstall() {
-        const p = this.state.installPrompt;
-        if (!p) return;
-        p.prompt();
-        await p.userChoice;
-        this.setState({ installPrompt: null });
+        const p = this.state.installPrompt || window.__installPrompt;
+        if (p) {
+            p.prompt();
+            const choice = await p.userChoice;
+            window.__installPrompt = null;
+            this.setState({ installPrompt: null });
+            if (choice && choice.outcome === "accepted") this.setState({ installed: true });
+            return;
+        }
+        // The browser only offers its install prompt once per visit (and never on plain http),
+        // so when it is not available show the manual steps instead.
+        const secure = window.isSecureContext;
+        Swal.fire({
+            title: "Install this POS as an app",
+            width: 620,
+            confirmButtonText: "OK",
+            html: `<div class="text-left" style="font-size:15px">
+                ${secure ? "" : `<div class="alert alert-warning">This page is not on <b>https</b>, so the browser will not install it. Open the site with https:// first.</div>`}
+                <p class="mb-1"><b>Chrome / Edge on a PC</b></p>
+                <ol class="pl-3"><li>Click the <b>install icon</b> at the right end of the address bar (a small screen with a down arrow),<br>or open the <b>⋮ menu → Cast, save and share → Install page as app</b> (Edge: <b>… → Apps → Install this site as an app</b>).</li><li>Click <b>Install</b>. A shortcut appears on the desktop.</li></ol>
+                <p class="mb-1"><b>Android</b></p>
+                <ol class="pl-3"><li>Open the browser menu <b>⋮</b> → <b>Install app</b> / <b>Add to Home screen</b>.</li></ol>
+                <p class="mb-1"><b>iPhone / iPad (Safari)</b></p>
+                <ol class="pl-3"><li>Tap <b>Share</b> → <b>Add to Home Screen</b>.</li></ol>
+                <p class="text-muted mb-0"><small>After installing, open the POS once while online so products are saved for offline use.</small></p>
+            </div>`,
+        });
     }
 
     // ---- cart ----------------------------------------------------------------
@@ -757,7 +790,7 @@ class Cart extends Component {
                     <button className="btn btn-xs btn-outline-secondary mr-2" onClick={() => this.handleManualSync()} disabled={this.state.syncing || !this.state.online}>
                         <i className={"fas fa-sync" + (this.state.syncing ? " fa-spin" : "")}></i> Sync now
                     </button>
-                    {this.state.installPrompt && (
+                    {!this.isInstalled() && (
                         <button className="btn btn-xs btn-outline-primary" onClick={() => this.handleInstall()}>
                             <i className="fas fa-download"></i> Install app
                         </button>
