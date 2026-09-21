@@ -47,7 +47,7 @@ class PosSyncController extends Controller
                 'receipt_policy' => config('settings.receipt_policy'),
                 'receipt_footer' => config('settings.receipt_footer'),
                 'receipt_credit' => config('settings.receipt_credit'),
-                'logo_url' => app_logo_url(),
+                'logo_url' => bill_logo_url(),
             ],
             'methods' => Payment::METHODS,
             'cashier' => $user->getFullname(),

@@ -18,10 +18,11 @@ class SettingController extends Controller
     {
         $request->validate([
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:2048'],
+            'bill_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:2048'],
         ]);
 
         $storeId = $request->user()->store_id;
-        $data = $request->except(['_token', 'logo', 'remove_logo']);
+        $data = $request->except(['_token', 'logo', 'remove_logo', 'bill_logo', 'remove_bill_logo']);
         foreach ($data as $key => $value) {
             $setting = Setting::firstOrCreate(['key' => $key, 'store_id' => $storeId]);
             $setting->value = $value;
@@ -37,6 +38,17 @@ class SettingController extends Controller
         } elseif ($request->boolean('remove_logo') && $current) {
             Storage::disk('public')->delete($current);
             Setting::where('key', 'logo')->where('store_id', $storeId)->delete();
+        }
+
+        $currentBill = config('settings.bill_logo');
+        if ($request->hasFile('bill_logo')) {
+            if ($currentBill) {
+                Storage::disk('public')->delete($currentBill);
+            }
+            Setting::updateOrCreate(['key' => 'bill_logo', 'store_id' => $storeId], ['value' => $request->file('bill_logo')->store('logos', 'public')]);
+        } elseif ($request->boolean('remove_bill_logo') && $currentBill) {
+            Storage::disk('public')->delete($currentBill);
+            Setting::where('key', 'bill_logo')->where('store_id', $storeId)->delete();
         }
 
         return redirect()->route('settings.index')->with('success', __('Settings saved.'));

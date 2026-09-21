@@ -60,7 +60,7 @@
     $methodName = $payment ? $payment->methodLabel() : 'Cash';
 @endphp
     <div class="center">
-        <img class="logo" src="{{ app_logo_url() }}" alt="">
+        <img class="logo" src="{{ bill_logo_url() }}" alt="">
         @if($address)<div class="address">{{ $address }}</div>@endif
         @if($phone)<div class="phone">Ph: {{ $phone }}</div>@endif
         <div class="title">{{ strtoupper(config('settings.receipt_title') ?: 'Original Sales Invoice') }}</div>

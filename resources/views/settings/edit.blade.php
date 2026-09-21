@@ -27,7 +27,28 @@
                         <label class="form-check-label" for="remove_logo">{{ __('Remove custom logo') }}</label>
                     </div>
                 @endif
-                <small class="form-text text-muted">{{ __('Shown in the sidebar, login page and printed receipts.') }}</small>
+                <small class="form-text text-muted">{{ __('Shown in the sidebar and login page.') }}</small>
+            </div>
+
+            <div class="form-group">
+                <label for="bill_logo">{{ __('Bill logo') }}</label>
+                <div class="mb-2">
+                    <img src="{{ bill_logo_url() }}" alt="Bill logo" style="max-height:80px;max-width:200px;background:#eee;padding:4px;border-radius:4px">
+                </div>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input @error('bill_logo') is-invalid @enderror" name="bill_logo" id="bill_logo" accept="image/*">
+                    <label class="custom-file-label" for="bill_logo">{{ __('Choose bill logo (PNG/JPG, max 2MB)') }}</label>
+                </div>
+                @error('bill_logo')
+                <span class="text-danger small" role="alert"><strong>{{ $message }}</strong></span>
+                @enderror
+                @if(config('settings.bill_logo'))
+                    <div class="form-check mt-2">
+                        <input type="checkbox" class="form-check-input" name="remove_bill_logo" value="1" id="remove_bill_logo">
+                        <label class="form-check-label" for="remove_bill_logo">{{ __('Remove bill logo (use the normal logo)') }}</label>
+                    </div>
+                @endif
+                <small class="form-text text-muted">{{ __('Printed at the top of bills. If empty, the normal logo is used.') }}</small>
             </div>
 
             <div class="form-group">
