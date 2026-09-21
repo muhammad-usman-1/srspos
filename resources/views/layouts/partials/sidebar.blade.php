@@ -2,7 +2,7 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="{{route('home')}}" class="brand-link" style="background:#fff;display:flex;align-items:center;justify-content:center;padding:8px 12px;height:57px">
-        <img src="{{ app_logo_url() }}" alt="{{ config('app.name') }}" style="object-fit:contain;max-height:38px;max-width:100%;width:auto">
+        <img src="{{ app_logo_url() }}" alt="{{ config('app.name') }}" style="object-fit:contain;max-width:100%;width:auto">
     </a>
 
     <!-- Sidebar -->
