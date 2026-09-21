@@ -14,7 +14,7 @@ class SettingsSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            'app_name' => 'Laravel-POS',
+            'app_name' => 'SRSPOS',
             'currency_symbol' => 'PKR',
             'warning_quantity' => '10',
             'enable_discount' => '1',

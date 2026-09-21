@@ -1,9 +1,10 @@
+@php $brand = 'SRSPOS'; @endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name') }} – Point of Sale that never stops selling</title>
+    <title>{{ $brand }} – Point of Sale that never stops selling</title>
     <meta name="description" content="Billing, stock, purchases and receipts in one place. Keeps working even when the internet goes down.">
     <link rel="icon" href="{{ asset('images/pwa-192.png') }}">
     <style>
@@ -105,7 +106,7 @@
 
 <header class="nav">
     <div class="wrap">
-        <a href="/" class="brand"><img src="{{ app_logo_url() }}" alt="{{ config('app.name') }}">@if(has_custom_logo()) {{ config('app.name') }}@endif</a>
+        <a href="/" class="brand"><img src="{{ app_logo_url() }}" alt="{{ $brand }}">@if(has_custom_logo()) {{ $brand }}@endif</a>
         <nav>
             <a class="link" href="#features">Features</a>
             <a class="link" href="#offline">Works offline</a>
@@ -210,7 +211,7 @@
 
 <footer>
     <div class="wrap">
-        <span>© {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</span>
+        <span>© {{ date('Y') }} {{ $brand }}. All rights reserved.</span>
         <span>Point of sale · Stock · Purchases</span>
     </div>
 </footer>
