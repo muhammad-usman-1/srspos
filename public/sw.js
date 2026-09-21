@@ -66,7 +66,8 @@ self.addEventListener('fetch', (event) => {
     const isAsset =
         ['style', 'script', 'font', 'image'].includes(req.destination) ||
         url.pathname.startsWith('/build/') ||
-        url.pathname.startsWith('/storage/');
+        url.pathname.startsWith('/storage/') ||
+        url.pathname.startsWith('/media/');
     if (!isAsset) return;
 
     const hashed = url.pathname.startsWith('/build/');

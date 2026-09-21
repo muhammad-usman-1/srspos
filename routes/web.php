@@ -23,6 +23,16 @@ Route::get('/', fn(): Redirector|RedirectResponse => redirect('/admin'));
 
 Auth::routes(['register' => false]);
 
+// Uploaded files (logo, product images). Served by Laravel so it works on hosts where
+// the web server does not map /storage (or symlinks are disabled).
+Route::get('/media/{path}', function (string $path) {
+    abort_if(str_contains($path, '..'), 404);
+    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+    abort_unless($disk->exists($path), 404);
+
+    return $disk->response($path, null, ['Cache-Control' => 'public, max-age=86400']);
+})->where('path', '.*')->name('media');
+
 Route::prefix('admin')->middleware(['auth', 'locale', 'store.access'])->group(function (): void {
     Route::get('/', HomeController::class)->name('home');
     // Superadmin: store management
