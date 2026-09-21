@@ -14,14 +14,11 @@
                 <div class="col-md-5">
                     <form action="{{route('orders.index')}}">
                         <div class="row">
-                            <div class="col-md-5">
-                                <input type="date" name="start_date" class="form-control" value="{{request('start_date')}}" />
+                            <div class="col-md-6">
+                                <input type="date" name="start_date" class="form-control" value="{{request('start_date')}}" onchange="this.form.submit()" />
                             </div>
-                            <div class="col-md-5">
-                                <input type="date" name="end_date" class="form-control" value="{{request('end_date')}}" />
-                            </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-outline-primary" type="submit">{{ __('order.submit') }}</button>
+                            <div class="col-md-6">
+                                <input type="date" name="end_date" class="form-control" value="{{request('end_date')}}" onchange="this.form.submit()" />
                             </div>
                         </div>
                     </form>

@@ -620,13 +620,13 @@ class Cart extends Component {
         const saved = await this.syncQueue();
         if (saved[sale.uuid]) {
             if (autoPrint) this.printServerReceipt(saved[sale.uuid]);
-            Swal.fire({ icon: "success", title: "Payment recorded", text: `Order #${saved[sale.uuid]}`, timer: 1500, showConfirmButton: false });
+            Swal.fire({ toast: true, position: "top-end", icon: "success", title: `Payment recorded - Order #${saved[sale.uuid]}`, showConfirmButton: false, timer: 2500 });
             return;
         }
 
         const stillQueued = this.queueRef.find((q) => q.uuid === sale.uuid);
         if (stillQueued && stillQueued.failed) {
-            Swal.fire("Sale not saved on the server", stillQueued.error + " — it stays in the list of unsent sales.", "error");
+            Swal.fire({ toast: true, position: "top-end", icon: "error", title: "Sale not saved on the server", text: stillQueued.error + " — it stays in the list of unsent sales.", showConfirmButton: false, timer: 5000 });
             return;
         }
 
@@ -637,7 +637,7 @@ class Cart extends Component {
         const withRef = { ...sale, offline_ref: ref };
         this.setQueue(this.queueRef.map((q) => (q.uuid === sale.uuid ? withRef : q)));
         if (autoPrint) this.printOfflineReceipt(withRef, ref);
-        Swal.fire({ icon: "info", title: `Saved offline (${ref})`, text: "It will upload automatically when the internet returns.", timer: 2200, showConfirmButton: false });
+        Swal.fire({ toast: true, position: "top-end", icon: "info", title: `Saved offline (${ref})`, text: "It will upload automatically when the internet returns.", showConfirmButton: false, timer: 3500 });
     }
 
     // ---- keyboard control ------------------------------------------------------
