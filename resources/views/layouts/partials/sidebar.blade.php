@@ -27,13 +27,15 @@
                     </a>
                 </li>
 
-                <!-- Stock -->
+                <!-- Stock (hidden for stores in "simple" stock mode: no quantity to manage) -->
+                @if(store_tracks_stock())
                 <li class="nav-item">
                     <a href="{{ route('stock.index') }}" class="nav-link {{ activeSegment('stock') ?: activeSegment('products') }}">
                         <i class="nav-icon fas fa-boxes"></i>
                         <p>{{ __('Stock Management') }}</p>
                     </a>
                 </li>
+                @endif
 
                 <li class="nav-header">{{ __('Sales') }}</li>
                 <!-- POS Cart -->
@@ -60,6 +62,7 @@
                     </a>
                 </li>
 
+                @if(store_tracks_stock())
                 <li class="nav-header">{{ __('Purchases') }}</li>
                 <!-- Purchases (Dropdown) -->
                 <li class="nav-item {{ request()->routeIs('purchases.*') ? 'menu-open' : '' }}">
@@ -85,6 +88,7 @@
                         </li>
                     </ul>
                 </li>
+                @endif
                 <!-- Suppliers -->
                 <li class="nav-item">
                     <a href="{{ route('suppliers.index') }}" class="nav-link {{ activeSegment('suppliers') }}">

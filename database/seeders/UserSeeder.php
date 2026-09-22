@@ -14,6 +14,8 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // First store (created by the multi-store migration on fresh installs too).
+        // Its stock mode is left unset on purpose — the store admin chooses it in
+        // Settings the first time they log in, and it can never be changed after that.
         $store = Store::first() ?? Store::create(['name' => 'Main Store', 'is_active' => true]);
 
         // Project owner: manages stores only, no POS / stock access.

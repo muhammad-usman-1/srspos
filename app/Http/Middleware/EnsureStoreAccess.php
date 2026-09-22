@@ -49,6 +49,9 @@ class EnsureStoreAccess
         $storeSettings = Setting::where('store_id', $store->id)->pluck('value', 'key')->all();
         config(['settings' => array_merge(config('settings', []), $storeSettings)]);
         config(['app.name' => config('settings.app_name') ?: $store->name]);
+        // The stock mode lives on the store row (write-once), not the generic settings
+        // table, but the rest of the app reads it the same way as any other setting.
+        config(['settings.stock_mode' => $store->stock_mode ?: \App\Models\Store::STOCK_MODE_TRACKED]);
 
         return $next($request);
     }

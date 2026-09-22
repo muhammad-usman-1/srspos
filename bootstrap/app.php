@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'locale' => \App\Http\Middleware\SetLocale::class,
             'store.access' => \App\Http\Middleware\EnsureStoreAccess::class,
+            'stock.tracked' => \App\Http\Middleware\EnsureStockTracked::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

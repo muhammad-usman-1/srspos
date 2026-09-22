@@ -80,6 +80,7 @@
                 </span>
                 @enderror
             </div>
+            @if(store_tracks_stock())
             <div class="form-group">
                 <label for="warning_quantity">{{ __('settings.warning_quantity') }}</label>
                 <input type="text" name="warning_quantity" class="form-control @error('warning_quantity') is-invalid @enderror" id="warning_quantity" placeholder="{{ __('settings.warning_quantity') }}" value="{{ old('warning_quantity', config('settings.warning_quantity')) }}">
@@ -89,6 +90,45 @@
                 </span>
                 @enderror
             </div>
+            @endif
+
+            <hr>
+            <h5>{{ __('Stock mode') }}</h5>
+            @php($store = auth()->user()->store)
+            @if($store && $store->hasChosenStockMode())
+                <div class="alert alert-light border d-flex align-items-center">
+                    @if($store->tracksStock())
+                        <i class="fas fa-boxes text-primary mr-2"></i>
+                        <div>
+                            <b>{{ __('Tracking stock quantity') }}</b> — {{ __('quantities are adjusted on sale/purchase and low-stock is flagged.') }}
+                        </div>
+                    @else
+                        <i class="fas fa-tags text-primary mr-2"></i>
+                        <div>
+                            <b>{{ __('Simple catalogue') }}</b> — {{ __('products are just saved, no quantity is tracked.') }}
+                        </div>
+                    @endif
+                </div>
+                <small class="form-text text-muted mb-3 d-block">{{ __('Chosen when this store was set up and cannot be changed.') }}</small>
+            @else
+                <p class="text-muted">{{ __('Choose how this store manages stock. This can only be set once — it cannot be changed afterwards.') }}</p>
+                <div class="form-row">
+                    <div class="col-md-6 mb-2">
+                        <label class="border rounded p-3 d-block" style="cursor:pointer">
+                            <input type="radio" name="stock_mode" value="tracked" {{ old('stock_mode', 'tracked') === 'tracked' ? 'checked' : '' }}>
+                            <b class="ml-1">{{ __('Track stock quantity') }}</b>
+                            <div class="small text-muted mt-1">{{ __('Plus/minus quantity on every sale and purchase, with low-stock alerts and a stock ledger.') }}</div>
+                        </label>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="border rounded p-3 d-block" style="cursor:pointer">
+                            <input type="radio" name="stock_mode" value="simple" {{ old('stock_mode') === 'simple' ? 'checked' : '' }}>
+                            <b class="ml-1">{{ __('Simple: just save products') }}</b>
+                            <div class="small text-muted mt-1">{{ __('No quantity, no low-stock alerts. Every product is always sellable. Stock Management and Purchases are hidden.') }}</div>
+                        </label>
+                    </div>
+                </div>
+            @endif
             <hr>
             <h5>{{ __('Bill / Receipt') }}</h5>
             <div class="form-group">

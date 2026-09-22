@@ -22,7 +22,9 @@ class OrderController extends Controller
             ->when($request->input('end_date'), function ($query, string $endDate): void {
                 $query->where('created_at', '<=', $endDate . ' 23:59:59');
             })
-            ->latest()
+            // order by id, not created_at: an offline sale keeps the timestamp of when it was
+            // made, so it can upload after a later online sale and sort out of position by date
+            ->orderByDesc('id')
             ->paginate(10);
 
         $total = $orders->sum(fn($order) => $order->total());

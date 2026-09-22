@@ -6,6 +6,17 @@ if (!function_exists('activeSegment')) {
     }
 }
 
+if (!function_exists('store_tracks_stock')) {
+    /**
+     * True when this store's chosen stock mode is "tracked" (quantities, low-stock
+     * alerts). False when it picked "simple" (products only, no quantities).
+     */
+    function store_tracks_stock(): bool
+    {
+        return config('settings.stock_mode', \App\Models\Store::STOCK_MODE_TRACKED) !== \App\Models\Store::STOCK_MODE_SIMPLE;
+    }
+}
+
 if (!function_exists('app_logo_url')) {
     /**
      * URL of the logo uploaded in Settings, falling back to the bundled logo.

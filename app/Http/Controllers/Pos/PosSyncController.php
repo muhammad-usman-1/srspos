@@ -22,6 +22,8 @@ class PosSyncController extends Controller
     {
         $user = $request->user();
 
+        $tracksStock = store_tracks_stock();
+
         return response()->json([
             'products' => Product::orderBy('name')->get(['id', 'name', 'barcode', 'price', 'mkt_price', 'quantity'])
                 ->map(fn(Product $p): array => [
@@ -30,12 +32,15 @@ class PosSyncController extends Controller
                     'barcode' => $p->barcode,
                     'price' => (float) $p->price,
                     'mkt_price' => $p->mkt_price !== null ? (float) $p->mkt_price : null,
-                    'quantity' => (int) $p->quantity,
+                    // A "simple" store never tracks quantity: every product is always sellable.
+                    // (a large but JS-safe number, not PHP_INT_MAX, so it round-trips through JSON exactly)
+                    'quantity' => $tracksStock ? (int) $p->quantity : 999999999,
                 ])->all(),
             'customers' => Customer::orderBy('first_name')->get(['id', 'first_name', 'last_name'])->all(),
             'settings' => [
                 'app_name' => config('app.name'),
                 'currency_symbol' => config('settings.currency_symbol'),
+                'stock_mode' => config('settings.stock_mode'),
                 'warning_quantity' => (int) config('settings.warning_quantity', 10),
                 'enable_discount' => (bool) config('settings.enable_discount'),
                 'enable_tax' => (bool) config('settings.enable_tax'),

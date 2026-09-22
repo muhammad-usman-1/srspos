@@ -58,18 +58,21 @@ Route::prefix('admin')->middleware(['auth', 'locale', 'store.access'])->group(fu
     Route::delete('/cart/delete', [CartController::class, 'delete']);
     Route::delete('/cart/empty', [CartController::class, 'empty']);
 
-    Route::get('/purchases/data', [PurchaseController::class, 'data'])->name('purchases.data');
-    Route::get('/purchases/{purchase}/receipt', [PurchaseController::class, 'receipt'])->name('purchases.receipt');
-    Route::resource('purchases', PurchaseController::class);
+    // Purchases add stock, so they only make sense for stores that track quantity.
+    Route::middleware('stock.tracked')->group(function (): void {
+        Route::get('/purchases/data', [PurchaseController::class, 'data'])->name('purchases.data');
+        Route::get('/purchases/{purchase}/receipt', [PurchaseController::class, 'receipt'])->name('purchases.receipt');
+        Route::resource('purchases', PurchaseController::class);
 
-    // Purchase Cart API
-    Route::prefix('purchase-cart')->name('purchase-cart.')->group(function (): void {
-        Route::get('/', [PurchaseCartController::class, 'index'])->name('index');
-        Route::post('/', [PurchaseCartController::class, 'store'])->name('store');
-        Route::post('/change-qty', [PurchaseCartController::class, 'changeQty'])->name('change-qty');
-        Route::post('/change-price', [PurchaseCartController::class, 'changePrice'])->name('change-price');
-        Route::delete('/delete', [PurchaseCartController::class, 'delete'])->name('delete');
-        Route::delete('/empty', [PurchaseCartController::class, 'empty'])->name('empty');
+        // Purchase Cart API
+        Route::prefix('purchase-cart')->name('purchase-cart.')->group(function (): void {
+            Route::get('/', [PurchaseCartController::class, 'index'])->name('index');
+            Route::post('/', [PurchaseCartController::class, 'store'])->name('store');
+            Route::post('/change-qty', [PurchaseCartController::class, 'changeQty'])->name('change-qty');
+            Route::post('/change-price', [PurchaseCartController::class, 'changePrice'])->name('change-price');
+            Route::delete('/delete', [PurchaseCartController::class, 'delete'])->name('delete');
+            Route::delete('/empty', [PurchaseCartController::class, 'empty'])->name('empty');
+        });
     });
 
     // Offline-capable POS
@@ -82,10 +85,12 @@ Route::prefix('admin')->middleware(['auth', 'locale', 'store.access'])->group(fu
     Route::post('/held-bills/{heldBill}/resume', [HeldBillController::class, 'resume'])->name('held-bills.resume');
     Route::delete('/held-bills/{heldBill}', [HeldBillController::class, 'destroy'])->name('held-bills.destroy');
 
-    // Stock management
-    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
-    Route::get('/stock/movements', [StockController::class, 'movements'])->name('stock.movements');
-    Route::post('/stock/{product}/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
+    // Stock management (hidden for stores in "simple" stock mode)
+    Route::middleware('stock.tracked')->group(function (): void {
+        Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+        Route::get('/stock/movements', [StockController::class, 'movements'])->name('stock.movements');
+        Route::post('/stock/{product}/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
+    });
 
     // Orders
     Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');

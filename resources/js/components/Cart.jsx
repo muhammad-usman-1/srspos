@@ -547,13 +547,12 @@ class Cart extends Component {
         document.body.appendChild(frame);
     }
 
-    printServerReceipt(orderId) {
-        this.printFrame((f) => {
-            f.src = `/admin/orders/${orderId}/receipt?print=1`;
-        });
-    }
-
-    printOfflineReceipt(sale, billNo) {
+    // Builds the bill in the browser and prints it straight away (no server round trip,
+    // no extra click inside the app) — the only thing the browser still shows is its own
+    // native print dialog, which no web page is allowed to skip for security reasons.
+    // To remove that dialog too, run Chrome/Edge with the --kiosk-printing flag, which
+    // prints silently to the default printer.
+    printReceipt(sale, billNo) {
         const html = buildReceiptHtml(sale, billNo, this.state.settings, window.APP.cashier);
         this.printFrame((f) => {
             f.onload = () => {
@@ -616,7 +615,7 @@ class Cart extends Component {
         // 3. try to upload right away
         const saved = await this.syncQueue();
         if (saved[sale.uuid]) {
-            if (autoPrint) this.printServerReceipt(saved[sale.uuid]);
+            if (autoPrint) this.printReceipt(sale, saved[sale.uuid]);
             Swal.fire({ toast: true, position: "top-end", icon: "success", title: `Payment recorded - Order #${saved[sale.uuid]}`, showConfirmButton: false, timer: 2500 });
             return;
         }
@@ -633,7 +632,7 @@ class Cart extends Component {
         const ref = "OFF-" + String(seq).padStart(4, "0");
         const withRef = { ...sale, offline_ref: ref };
         this.setQueue(this.queueRef.map((q) => (q.uuid === sale.uuid ? withRef : q)));
-        if (autoPrint) this.printOfflineReceipt(withRef, ref);
+        if (autoPrint) this.printReceipt(withRef, ref);
         Swal.fire({ toast: true, position: "top-end", icon: "info", title: `Saved offline (${ref})`, text: "It will upload automatically when the internet returns.", showConfirmButton: false, timer: 3500 });
     }
 
@@ -764,111 +763,106 @@ class Cart extends Component {
         const set = (patch) => this.setState(patch);
 
         return (
-            <div>
-                <div className="pos-status d-flex flex-wrap align-items-center mb-2">
-                    <span className={"badge mr-2 " + (offline ? "badge-danger" : "badge-success")}>
+            <div className="pos-screen">
+                <div className="pos-toolbar">
+                    <span className={"pos-chip " + (offline ? "pos-chip-danger" : "pos-chip-success")}>
                         <i className={"fas " + (offline ? "fa-wifi" : "fa-check-circle")}></i> {offline ? "Offline" : "Online"}
                     </span>
                     {waiting > 0 && (
-                        <span className="badge badge-warning mr-2">
+                        <span className="pos-chip pos-chip-warning">
                             {waiting} sale{waiting > 1 ? "s" : ""} waiting to sync
                         </span>
                     )}
                     {failed > 0 && (
-                        <button className="btn btn-xs btn-danger mr-2" onClick={() => this.showFailedSales()}>
+                        <button type="button" className="pos-chip pos-chip-danger pos-chip-btn" onClick={() => this.showFailedSales()}>
                             {failed} sale{failed > 1 ? "s" : ""} not saved – review
                         </button>
                     )}
                     {this.state.sessionExpired && (
-                        <a className="badge badge-danger mr-2" href="/login" target="_blank" rel="noreferrer">
+                        <a className="pos-chip pos-chip-danger" href="/login" target="_blank" rel="noreferrer">
                             Session expired – log in again to sync
                         </a>
                     )}
-                    <button className="btn btn-xs btn-outline-secondary mr-2" onClick={() => this.handleManualSync()} disabled={this.state.syncing || !this.state.online}>
+                    <button type="button" className="pos-chip pos-chip-ghost" onClick={() => this.handleManualSync()} disabled={this.state.syncing || !this.state.online}>
                         <i className={"fas fa-sync" + (this.state.syncing ? " fa-spin" : "")}></i> Sync now
                     </button>
                     {!this.isInstalled() && (
-                        <button className="btn btn-xs btn-outline-primary" onClick={() => this.handleInstall()}>
+                        <button type="button" className="pos-chip pos-chip-ghost" onClick={() => this.handleInstall()}>
                             <i className="fas fa-download"></i> Install app
                         </button>
                     )}
                 </div>
 
-                <div className="row">
-                    <div className="col-md-6 col-lg-4">
-                        <div className="row mb-2">
-                            <div className="col">
-                                <form onSubmit={this.handleScanBarcode}>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Scan Barcode"
-                                        ref={this.barcodeRef}
-                                        value={barcode}
-                                        onChange={(e) => set({ barcode: e.target.value })}
-                                    />
-                                </form>
-                            </div>
-                            <div className="col">
-                                <select className="form-control" value={this.state.customer_id} onChange={(e) => set({ customer_id: e.target.value })}>
-                                    <option value="">General Customer</option>
-                                    {customers.map((cus) => (
-                                        <option key={cus.id} value={cus.id}>{`${cus.first_name} ${cus.last_name}`}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="user-cart">
-                            <div className="card">
-                                <table className="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Product Name</th>
-                                            <th>Quantity</th>
-                                            <th className="text-right">Price</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {cart.map((c, ci) => (
-                                            <tr key={c.id} className={ci === this.state.activeCart ? "table-primary" : ""}>
-                                                <td>{c.name}</td>
-                                                <td>
-                                                    <input
-                                                        type="text"
-                                                        className="form-control form-control-sm qty"
-                                                        value={c.qty}
-                                                        onChange={(e) => this.handleChangeQty(c.id, e.target.value)}
-                                                    />
-                                                    <button className="btn btn-danger btn-sm" onClick={() => this.handleClickDelete(c.id)}>
-                                                        <i className="fas fa-trash"></i>
-                                                    </button>
-                                                </td>
-                                                <td className="text-right">
-                                                    {cur} {(c.price * (Number(c.qty) || 0)).toFixed(2)}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                <div className="pos-layout">
+                    <section className="pos-cart-panel">
+                        <div className="pos-panel-head">
+                            <form className="pos-barcode-form" onSubmit={this.handleScanBarcode}>
+                                <i className="fas fa-barcode"></i>
+                                <input
+                                    type="text"
+                                    placeholder="Scan barcode"
+                                    ref={this.barcodeRef}
+                                    value={barcode}
+                                    onChange={(e) => set({ barcode: e.target.value })}
+                                />
+                            </form>
+                            <select className="pos-customer-select" value={this.state.customer_id} onChange={(e) => set({ customer_id: e.target.value })}>
+                                <option value="">General Customer</option>
+                                {customers.map((cus) => (
+                                    <option key={cus.id} value={cus.id}>{`${cus.first_name} ${cus.last_name}`}</option>
+                                ))}
+                            </select>
                         </div>
 
-                        <div className="checkout-panel border rounded p-2 mb-2">
-                            <div className="d-flex justify-content-between">
+                        <div className="pos-cart-list">
+                            {cart.length === 0 ? (
+                                <div className="pos-cart-empty">
+                                    <i className="fas fa-shopping-basket"></i>
+                                    <p>Cart is empty</p>
+                                    <small>Scan a barcode or tap a product to start a sale</small>
+                                </div>
+                            ) : (
+                                cart.map((c, ci) => (
+                                    <div key={c.id} className={"pos-cart-row" + (ci === this.state.activeCart ? " pos-cart-row-active" : "")}>
+                                        <div className="pos-cart-row-main">
+                                            <div className="pos-cart-row-name" title={c.name}>{c.name}</div>
+                                            <div className="pos-cart-row-price">{cur} {Number(c.price).toFixed(2)} each</div>
+                                        </div>
+                                        <div className="pos-qty-stepper">
+                                            <button type="button" tabIndex={-1} onClick={() => this.handleChangeQty(c.id, Math.max(1, (parseInt(c.qty, 10) || 0) - 1))}>−</button>
+                                            <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                value={c.qty}
+                                                onChange={(e) => this.handleChangeQty(c.id, e.target.value)}
+                                            />
+                                            <button type="button" tabIndex={-1} onClick={() => this.handleChangeQty(c.id, (parseInt(c.qty, 10) || 0) + 1)}>+</button>
+                                        </div>
+                                        <div className="pos-cart-row-total">{cur} {(c.price * (Number(c.qty) || 0)).toFixed(2)}</div>
+                                        <button type="button" className="pos-cart-row-remove" title="Remove" onClick={() => this.handleClickDelete(c.id)}>
+                                            <i className="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <div className="pos-checkout-panel">
+                            <div className="pos-totals-row">
                                 <span>Subtotal</span>
                                 <span>{cur} {t.subtotal.toFixed(2)}</span>
                             </div>
                             {settings.enable_discount && (
-                                <div className="d-flex justify-content-between align-items-center my-1">
+                                <div className="pos-totals-row">
                                     <span>Discount</span>
-                                    <div className="input-group input-group-sm" style={{ maxWidth: 170 }}>
+                                    <div className="input-group input-group-sm pos-inline-input">
                                         <input
                                             type="number" min="0" step="0.01" className="form-control text-right" placeholder="0"
                                             value={this.state.discountValue}
                                             onChange={(e) => set({ discountValue: e.target.value, amountReceived: null })}
                                         />
                                         <select
-                                            className="form-control" style={{ maxWidth: 80 }} value={this.state.discountType}
+                                            className="form-control" style={{ maxWidth: 64 }} value={this.state.discountType}
                                             onChange={(e) => set({ discountType: e.target.value, amountReceived: null })}
                                         >
                                             <option value="fixed">{cur}</option>
@@ -878,26 +872,27 @@ class Cart extends Component {
                                 </div>
                             )}
                             {settings.enable_tax && (
-                                <div className="d-flex justify-content-between align-items-center my-1">
+                                <div className="pos-totals-row">
                                     <span>{settings.tax_name} (%)</span>
                                     <div className="d-flex align-items-center">
                                         <small className="mr-2 text-muted">{cur} {t.tax.toFixed(2)}</small>
                                         <input
-                                            type="number" min="0" max="100" step="0.01" className="form-control form-control-sm text-right" style={{ width: 80 }}
+                                            type="number" min="0" max="100" step="0.01" className="form-control form-control-sm text-right" style={{ width: 68 }}
                                             value={this.state.taxRate}
                                             onChange={(e) => set({ taxRate: e.target.value, amountReceived: null })}
                                         />
                                     </div>
                                 </div>
                             )}
-                            <div className="d-flex justify-content-between font-weight-bold border-top pt-1 mt-1" style={{ fontSize: "1.15rem" }}>
+                            <div className="pos-totals-row pos-total-grand">
                                 <span>Total</span>
                                 <span>{cur} {t.total.toFixed(2)}</span>
                             </div>
-                            <div className="d-flex justify-content-between align-items-center mt-2">
+
+                            <div className="pos-payment-row">
                                 <span>Payment</span>
                                 <select
-                                    className="form-control form-control-sm" style={{ maxWidth: 170 }} value={this.state.method}
+                                    className="form-control form-control-sm" style={{ maxWidth: 150 }} value={this.state.method}
                                     onChange={(e) => set(e.target.value === "cash" ? { method: "cash" } : { method: e.target.value, amountReceived: null })}
                                 >
                                     {Object.entries(METHODS).map(([k, v]) => (
@@ -905,22 +900,29 @@ class Cart extends Component {
                                     ))}
                                 </select>
                             </div>
-                            <div className="d-flex justify-content-between align-items-center mt-1">
+                            <div className="pos-payment-row">
                                 <span>Received</span>
                                 <input
-                                    type="number" min="0" step="0.01" className="form-control form-control-sm text-right" style={{ maxWidth: 170 }}
+                                    type="number" min="0" step="0.01" className="form-control form-control-sm text-right pos-received-input"
                                     ref={this.receivedRef} value={received}
                                     onChange={(e) => set({ amountReceived: e.target.value })}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            if (cart.length && !this.state.submitting) this.handleClickSubmit();
+                                        }
+                                    }}
                                 />
                             </div>
                             {cart.length > 0 && (
-                                <div className={"text-right font-weight-bold " + (diff >= 0 ? "text-success" : "text-danger")}>
+                                <div className={"pos-change-line " + (diff >= 0 ? "is-change" : "is-due")}>
                                     {diff >= 0 ? `Change: ${cur} ${diff.toFixed(2)}` : `Balance due: ${cur} ${(-diff).toFixed(2)}`}
                                 </div>
                             )}
-                            <div className="custom-control custom-checkbox mt-1">
+
+                            <label className="pos-switch">
                                 <input
-                                    type="checkbox" className="custom-control-input" id="auto-print" checked={this.state.autoPrint}
+                                    type="checkbox" checked={this.state.autoPrint}
                                     onChange={(e) => {
                                         try {
                                             localStorage.setItem("pos_auto_print", e.target.checked ? "1" : "0");
@@ -928,51 +930,55 @@ class Cart extends Component {
                                         set({ autoPrint: e.target.checked });
                                     }}
                                 />
-                                <label className="custom-control-label" htmlFor="auto-print">Print receipt automatically</label>
-                            </div>
-                        </div>
+                                <span className="pos-switch-track"><span className="pos-switch-thumb"></span></span>
+                                <span className="pos-switch-label">Print receipt automatically</span>
+                            </label>
 
-                        <div className="row mb-2 mt-2">
-                            <div className="col">
-                                <button type="button" className="btn btn-warning btn-block" disabled={!cart.length} onClick={this.handleHoldBill}>
-                                    <i className="fas fa-pause"></i> Hold Bill
+                            <div className="pos-actions">
+                                <button type="button" className="pos-btn pos-btn-hold" disabled={!cart.length} onClick={this.handleHoldBill}>
+                                    <i className="fas fa-pause"></i> Hold
+                                </button>
+                                <button type="button" className="pos-btn pos-btn-held" onClick={this.handleShowHeldBills}>
+                                    <i className="fas fa-list"></i> Held ({held.length})
+                                </button>
+                                <button type="button" className="pos-btn pos-btn-cancel" disabled={!cart.length} onClick={this.handleEmptyCart}>
+                                    <i className="fas fa-times"></i> Cancel
                                 </button>
                             </div>
-                            <div className="col">
-                                <button type="button" className="btn btn-info btn-block" onClick={this.handleShowHeldBills}>
-                                    <i className="fas fa-list"></i> Held Bills ({held.length})
-                                </button>
-                            </div>
+                            <button
+                                type="button" className="pos-checkout-btn" disabled={!cart.length || this.state.submitting}
+                                onClick={this.handleClickSubmit}
+                            >
+                                {this.state.submitting ? (
+                                    <><i className="fas fa-spinner fa-spin"></i> Processing…</>
+                                ) : (
+                                    <>
+                                        <span><i className="fas fa-check-circle"></i> Checkout</span>
+                                        <span className="pos-checkout-amount">{cur} {t.total.toFixed(2)}</span>
+                                    </>
+                                )}
+                            </button>
                         </div>
-                        <div className="row">
-                            <div className="col">
-                                <button type="button" className="btn btn-danger btn-block" onClick={this.handleEmptyCart} disabled={!cart.length}>
-                                    Cancel
-                                </button>
-                            </div>
-                            <div className="col">
-                                <button type="button" className="btn btn-primary btn-block" disabled={!cart.length || this.state.submitting} onClick={this.handleClickSubmit}>
-                                    Checkout
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    </section>
 
-                    <div className="col-md-6 col-lg-8">
-                        <div className="mb-2">
+                    <section className="pos-catalog-panel">
+                        <div className="pos-search-bar">
+                            <i className="fas fa-search"></i>
                             <input
-                                type="text" className="form-control" placeholder="Search Product..."
+                                type="text" placeholder="Search product..."
                                 ref={this.searchRef} value={this.state.search}
                                 onChange={(e) => set({ search: e.target.value, activeProduct: -1 })}
                             />
-                            <small className="text-muted d-block mt-1 kbd-hints">
-                                <b>F1</b> Barcode · <b>F2</b> Search · <b>↑↓←→</b> Select · <b>Enter</b> Add · <b>PgUp/PgDn</b> Cart row · <b>+ / −</b> Qty · <b>Del</b> Remove · <b>F4</b> Received · <b>F8</b> Hold · <b>F9</b> Checkout · <b>Esc</b> Reset
-                            </small>
+                        </div>
+                        <div className="pos-kbd-hints">
+                            <b>F1</b> Barcode · <b>F2</b> Search · <b>↑↓←→</b> Select · <b>Enter</b> Add · <b>PgUp/PgDn</b> Cart row · <b>+ / −</b> Qty · <b>Del</b> Remove · <b>F4</b> Received · <b>F8</b> Hold · <b>F9</b> Checkout · <b>Esc</b> Reset
                         </div>
                         <div className="order-product">
                             {products.map((p, pi) => {
-                                const out = p.quantity <= 0;
-                                const low = !out && Number(settings.warning_quantity) >= p.quantity;
+                                // A "simple" store never tracks quantity: every product is always sellable.
+                                const tracksStock = settings.stock_mode !== "simple";
+                                const out = tracksStock && p.quantity <= 0;
+                                const low = tracksStock && !out && Number(settings.warning_quantity) >= p.quantity;
                                 const state = out ? "out" : low ? "low" : "ok";
                                 return (
                                     <div
@@ -981,17 +987,20 @@ class Cart extends Component {
                                         className={`item item-${state}${pi === this.state.activeProduct ? " item-active" : ""}`}
                                         title={p.name}
                                     >
+                                        {low && !out && <span className="item-badge">Low</span>}
                                         <div className="item-name">{p.name}</div>
                                         <div className="item-meta">
                                             <span className="item-price">{cur} {Number(p.price).toFixed(2)}</span>
-                                            <span className="item-stock">{out ? "Out of stock" : `${p.quantity} left`}</span>
+                                            {tracksStock && (
+                                                <span className="item-stock">{out ? "Out of stock" : `${p.quantity} left`}</span>
+                                            )}
                                         </div>
                                     </div>
                                 );
                             })}
                             {!products.length && <div className="text-muted p-3">No products found.</div>}
                         </div>
-                    </div>
+                    </section>
                 </div>
             </div>
         );

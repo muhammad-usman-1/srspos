@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,10 +20,19 @@ class SettingController extends Controller
         $request->validate([
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:2048'],
             'bill_logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:2048'],
+            'stock_mode' => ['nullable', 'in:tracked,simple'],
         ]);
 
+        $store = $request->user()->store;
+
+        // Write-once: only ever accepted the first time, before the store has a stock
+        // mode at all. Anything submitted after that (even a tampered request) is ignored.
+        if ($store && !$store->hasChosenStockMode() && $request->filled('stock_mode')) {
+            $store->forceFill(['stock_mode' => $request->input('stock_mode')])->save();
+        }
+
         $storeId = $request->user()->store_id;
-        $data = $request->except(['_token', 'logo', 'remove_logo', 'bill_logo', 'remove_bill_logo']);
+        $data = $request->except(['_token', 'logo', 'remove_logo', 'bill_logo', 'remove_bill_logo', 'stock_mode']);
         foreach ($data as $key => $value) {
             $setting = Setting::firstOrCreate(['key' => $key, 'store_id' => $storeId]);
             $setting->value = $value;

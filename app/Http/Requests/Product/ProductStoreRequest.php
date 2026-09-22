@@ -20,7 +20,8 @@ class ProductStoreRequest extends FormRequest
             'barcode' => ['required', 'string', 'max:50', \Illuminate\Validation\Rule::unique('products', 'barcode')->where('store_id', auth()->user()->store_id)],
             'price' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
             'mkt_price' => ['nullable', 'numeric', 'min:0', 'decimal:0,2'],
-            'quantity' => ['required', 'integer', 'min:0'],
+            // Stores in "simple" stock mode never show or need a quantity.
+            'quantity' => store_tracks_stock() ? ['required', 'integer', 'min:0'] : ['sometimes'],
             'status' => ['required', 'boolean'],
         ];
     }

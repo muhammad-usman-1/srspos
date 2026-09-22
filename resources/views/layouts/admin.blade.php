@@ -46,7 +46,9 @@
         @include('layouts.partials.sidebar')
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
-            <!-- Content Header (Page header) -->
+            <!-- Content Header (Page header) — skipped when the page sets no title, so pages
+                 like the POS screen are not left with an empty, padded header bar -->
+            @hasSection('content-header')
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
@@ -59,6 +61,7 @@
                     </div>
                 </div><!-- /.container-fluid -->
             </section>
+            @endif
 
             <!-- Main content -->
             <section class="content">

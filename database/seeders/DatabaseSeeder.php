@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(UserSeeder::class);
         $this->call(SettingsSeeder::class);
-        $this->call(ProductSeeder::class);
+        // No products are seeded: the catalogue starts empty and the store admin
+        // picks the stock mode (tracked/simple) in Settings before adding any.
     }
 }

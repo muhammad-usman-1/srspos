@@ -82,6 +82,7 @@
                 @enderror
             </div>
 
+            @if(store_tracks_stock())
             <div class="form-group">
                 <label for="quantity">{{ __('product.Quantity') }}</label>
                 <input type="text" name="quantity" class="form-control @error('quantity') is-invalid @enderror"
@@ -92,6 +93,7 @@
                 </span>
                 @enderror
             </div>
+            @endif
 
             <div class="form-group">
                 <label for="status">{{ __('product.Status') }}</label>
@@ -117,6 +119,19 @@
 <script>
     $(document).ready(function () {
         bsCustomFileInput.init();
+    });
+
+    // Auto-capitalize the first letter of each word as the admin types (e.g. "coca cola" -> "Coca Cola")
+    document.getElementById('name').addEventListener('input', function (e) {
+        var el = e.target;
+        var pos = el.selectionStart;
+        var capped = el.value.replace(/(^|\s)([a-z])/g, function (m, before, letter) {
+            return before + letter.toUpperCase();
+        });
+        if (capped !== el.value) {
+            el.value = capped;
+            el.selectionStart = el.selectionEnd = pos;
+        }
     });
 </script>
 @endsection

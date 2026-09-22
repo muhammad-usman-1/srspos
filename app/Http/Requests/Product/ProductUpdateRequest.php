@@ -26,7 +26,8 @@ class ProductUpdateRequest extends FormRequest
             ],
             'price' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
             'mkt_price' => ['nullable', 'numeric', 'min:0', 'decimal:0,2'],
-            'quantity' => ['required', 'integer', 'min:0'],
+            // Stores in "simple" stock mode never show or need a quantity.
+            'quantity' => store_tracks_stock() ? ['required', 'integer', 'min:0'] : ['sometimes'],
             'status' => ['required', 'boolean'],
         ];
     }

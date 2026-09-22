@@ -45,6 +45,10 @@ class OrderService
             }
             $order->save();
 
+            // A store that opted for the "simple" stock mode never tracks quantity: no stock
+            // check, no stock ledger entry, quantity stays whatever it already is (unused).
+            $tracksStock = store_tracks_stock();
+
             $subtotal = 0.0;
             foreach ($data['items'] as $line) {
                 $product = Product::lockForUpdate()->find($line['product_id']);
@@ -55,7 +59,7 @@ class OrderService
                 if ($qty < 1) {
                     throw new \Exception(__('Invalid quantity for :name.', ['name' => $product->name]));
                 }
-                if ($strictStock && $product->quantity < $qty) {
+                if ($tracksStock && $strictStock && $product->quantity < $qty) {
                     throw new \Exception(__('cart.available', ['quantity' => $product->quantity]) . ' (' . $product->name . ')');
                 }
 
@@ -66,7 +70,9 @@ class OrderService
                     'quantity' => $qty,
                     'product_id' => $product->id,
                 ]);
-                $product->adjustStock(-$qty, 'sale', 'Order #' . $order->id);
+                if ($tracksStock) {
+                    $product->adjustStock(-$qty, 'sale', 'Order #' . $order->id);
+                }
                 $subtotal += $unit * $qty;
             }
 
