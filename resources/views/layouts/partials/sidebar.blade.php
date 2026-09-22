@@ -27,10 +27,18 @@
                     </a>
                 </li>
 
-                <!-- Stock (hidden for stores in "simple" stock mode: no quantity to manage) -->
+                <!-- Products: the catalogue itself, shown in both stock modes -->
+                <li class="nav-item">
+                    <a href="{{ route('products.index') }}" class="nav-link {{ activeSegment('products') }}">
+                        <i class="nav-icon fas fa-tags"></i>
+                        <p>{{ __('product.title') }}</p>
+                    </a>
+                </li>
+
+                <!-- Stock Management: quantity, low-stock alerts, ledger — only for stores that track it -->
                 @if(store_tracks_stock())
                 <li class="nav-item">
-                    <a href="{{ route('stock.index') }}" class="nav-link {{ activeSegment('stock') ?: activeSegment('products') }}">
+                    <a href="{{ route('stock.index') }}" class="nav-link {{ activeSegment('stock') }}">
                         <i class="nav-icon fas fa-boxes"></i>
                         <p>{{ __('Stock Management') }}</p>
                     </a>

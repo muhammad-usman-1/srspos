@@ -19,7 +19,9 @@
                     <th>{{ __('product.Image') }}</th>
                     <th>{{ __('product.Barcode') }}</th>
                     <th>{{ __('product.Price') }}</th>
+                    @if(store_tracks_stock())
                     <th>{{ __('product.Quantity') }}</th>
+                    @endif
                     <th>{{ __('product.Status') }}</th>
                     <th>{{ __('product.Created_At') }}</th>
                     <th>{{ __('product.Updated_At') }}</th>
@@ -34,7 +36,9 @@
                     <td><img class="product-img" src="{{ Storage::url($product->image) }}" alt=""></td>
                     <td>{{$product->barcode}}</td>
                     <td>{{$product->price}}</td>
+                    @if(store_tracks_stock())
                     <td>{{$product->quantity}}</td>
+                    @endif
                     <td>
                         <span class="right badge badge-{{ $product->status ? 'success' : 'danger' }}">{{$product->status ? __('common.Active') : __('common.Inactive') }}</span>
                     </td>
