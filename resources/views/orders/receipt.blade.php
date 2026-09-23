@@ -113,7 +113,7 @@
         @if($due > 0)
             <tr><td>Amount Due</td><td class="r">{{ $n($due) }}</td></tr>
         @else
-            <tr><td>Balance</td><td class="r">{{ $n(max($balance, 0)) }}</td></tr>
+            <tr><td>Change</td><td class="r">{{ $n(max($balance, 0)) }}</td></tr>
         @endif
     </table>
 

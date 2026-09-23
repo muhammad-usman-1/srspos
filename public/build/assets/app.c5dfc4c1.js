@@ -211,7 +211,7 @@ ${e.customer_name?`<div class="meta"><span>Customer: ${Ni(e.customer_name)}</spa
   ${a.discount>0?`<tr><td class="s">Discount</td><td class="r s">- ${f(a.discount)}</td></tr>`:""}
   <tr><td>Grand Total</td><td class="r">${f(a.total)}</td></tr>
   <tr><td>${Ni(SC[e.method]||"Cash")} Paid</td><td class="r">${f(P)}</td></tr>
-  ${U>0?`<tr><td>Amount Due</td><td class="r">${f(U)}</td></tr>`:`<tr><td>Balance</td><td class="r">${f(Math.max(P-a.total,0))}</td></tr>`}
+  ${U>0?`<tr><td>Amount Due</td><td class="r">${f(U)}</td></tr>`:`<tr><td>Change</td><td class="r">${f(Math.max(P-a.total,0))}</td></tr>`}
 </table>
 ${n.receipt_policy?`<div class="policy">${Ni(n.receipt_policy)}</div>`:""}
 <div class="thanks">${Ni((n.receipt_footer||"Thanks for your visit").toUpperCase())}</div>

@@ -119,7 +119,7 @@ ${sale.customer_name ? `<div class="meta"><span>Customer: ${esc(sale.customer_na
   ${t.discount > 0 ? `<tr><td class="s">Discount</td><td class="r s">- ${n(t.discount)}</td></tr>` : ""}
   <tr><td>Grand Total</td><td class="r">${n(t.total)}</td></tr>
   <tr><td>${esc(METHODS[sale.method] || "Cash")} Paid</td><td class="r">${n(tendered)}</td></tr>
-  ${due > 0 ? `<tr><td>Amount Due</td><td class="r">${n(due)}</td></tr>` : `<tr><td>Balance</td><td class="r">${n(Math.max(tendered - t.total, 0))}</td></tr>`}
+  ${due > 0 ? `<tr><td>Amount Due</td><td class="r">${n(due)}</td></tr>` : `<tr><td>Change</td><td class="r">${n(Math.max(tendered - t.total, 0))}</td></tr>`}
 </table>
 ${s.receipt_policy ? `<div class="policy">${esc(s.receipt_policy)}</div>` : ""}
 <div class="thanks">${esc((s.receipt_footer || "Thanks for your visit").toUpperCase())}</div>
