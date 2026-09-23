@@ -1,7 +1,7 @@
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="{{route('home')}}" class="brand-link" style="background:#fff;display:flex;align-items:center;justify-content:center;padding:6px 10px;height:57px;overflow:hidden">
+    <a href="{{route('home')}}" class="brand-link" style="background:#343a40;display:flex;align-items:center;justify-content:center;padding:10px 10px;height:70px;overflow:hidden">
         <img src="{{ app_logo_url() }}" alt="{{ config('app.name') }}" style="display:block;margin:0 auto;max-height:70px;max-width:100%;width:auto;height:auto;object-fit:contain;object-position:center">
     </a>
 
