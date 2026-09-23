@@ -4,8 +4,12 @@
 @section('content-header', __('dashboard.title'))
 @section('content-actions')
     <a href="{{ route('cart.index') }}" class="btn btn-primary"><i class="fas fa-cash-register"></i> {{ __('Open POS') }}</a>
-    <a href="{{ route('stock.index') }}" class="btn btn-outline-secondary"><i class="fas fa-boxes"></i> {{ __('Stock') }}</a>
-    <a href="{{ route('purchases.create') }}" class="btn btn-outline-secondary"><i class="fas fa-truck-loading"></i> {{ __('New Purchase') }}</a>
+    @if(store_tracks_stock())
+        <a href="{{ route('stock.index') }}" class="btn btn-outline-secondary"><i class="fas fa-boxes"></i> {{ __('Stock') }}</a>
+        <a href="{{ route('purchases.create') }}" class="btn btn-outline-secondary"><i class="fas fa-truck-loading"></i> {{ __('New Purchase') }}</a>
+    @else
+        <a href="{{ route('products.create') }}" class="btn btn-outline-secondary"><i class="fas fa-plus"></i> {{ __('New Product') }}</a>
+    @endif
 @endsection
 
 @section('css')
@@ -53,12 +57,21 @@
             </div></div>
         </div>
         <div class="col-lg-3 col-sm-6 mb-3">
+            @if($tracks_stock)
             <a href="{{ route('stock.index', ['low' => 1]) }}" class="text-dark">
             <div class="card kpi"><div class="card-body">
                 <div class="ico" style="background:{{ $low_stock_count ? '#e8590c' : '#20c997' }}"><i class="fas fa-exclamation-triangle"></i></div>
                 <div><div class="lbl">{{ __('Low stock') }}</div><div class="val">{{ $low_stock_count }}</div><div class="sub">{{ __('products at or below') }} {{ $threshold }}</div></div>
             </div></div>
             </a>
+            @else
+            <a href="{{ route('products.index') }}" class="text-dark">
+            <div class="card kpi"><div class="card-body">
+                <div class="ico" style="background:#0ea5e9"><i class="fas fa-tags"></i></div>
+                <div><div class="lbl">{{ __('Products') }}</div><div class="val">{{ $products_count }}</div><div class="sub">{{ __('in catalogue') }}</div></div>
+            </div></div>
+            </a>
+            @endif
         </div>
     </div>
 
@@ -80,6 +93,7 @@
             </div>
         </div>
         <div class="col-lg-5 mb-3">
+            @if($tracks_stock)
             <div class="card panel h-100">
                 <div class="card-header d-flex justify-content-between"><span>{{ __('Low stock products') }}</span><a href="{{ route('stock.index', ['low' => 1]) }}">{{ __('View all') }}</a></div>
                 <div class="card-body py-2">
@@ -93,6 +107,21 @@
                     @endforelse
                 </div>
             </div>
+            @else
+            <div class="card panel h-100">
+                <div class="card-header d-flex justify-content-between"><span>{{ __('Top selling products') }}</span><a href="{{ route('products.index') }}">{{ __('View all') }}</a></div>
+                <div class="card-body py-2">
+                    @forelse($top_products as $p)
+                        <div class="stockrow">
+                            <span>{{ $p->name }}<br><small class="text-muted">{{ $p->barcode }}</small></span>
+                            <span class="badge badge-primary" style="font-size:13px">{{ (int) $p->total_sold }} {{ __('sold') }}</span>
+                        </div>
+                    @empty
+                        <div class="text-center text-muted py-4"><i class="fas fa-chart-line"></i> {{ __('No sales in the last 30 days yet.') }}</div>
+                    @endforelse
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 

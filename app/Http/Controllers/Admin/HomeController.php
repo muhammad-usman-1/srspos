@@ -35,6 +35,7 @@ class HomeController extends Controller
         });
 
         $threshold = (int) config('settings.warning_quantity', 10);
+        $tracksStock = store_tracks_stock();
 
         return view('home', [
             'orders_count' => $orders->count(),
@@ -44,8 +45,21 @@ class HomeController extends Controller
             'income_month' => $orders->where('created_at', '>=', today()->startOfMonth())->sum($income),
             'customers_count' => Customer::count(),
             'threshold' => $threshold,
-            'low_stock_count' => Product::where('quantity', '<=', $threshold)->count(),
-            'low_stock_products' => Product::where('quantity', '<=', $threshold)->orderBy('quantity')->limit(8)->get(),
+            // "Low stock" only means anything for a store that tracks quantity. A "simple"
+            // store shows its product count and top sellers instead, so nothing sits empty.
+            'tracks_stock' => $tracksStock,
+            'low_stock_count' => $tracksStock ? Product::where('quantity', '<=', $threshold)->count() : 0,
+            'low_stock_products' => $tracksStock ? Product::where('quantity', '<=', $threshold)->orderBy('quantity')->limit(8)->get() : collect(),
+            'products_count' => $tracksStock ? 0 : Product::count(),
+            'top_products' => $tracksStock ? collect() : Product::query()
+                ->selectRaw('products.*, SUM(order_items.quantity) as total_sold')
+                ->join('order_items', 'order_items.product_id', '=', 'products.id')
+                ->join('orders', 'orders.id', '=', 'order_items.order_id')
+                ->where('orders.created_at', '>=', today()->subDays(30))
+                ->groupBy('products.id')
+                ->orderByDesc('total_sold')
+                ->limit(8)
+                ->get(),
             'recent_orders' => Order::with(['items', 'payments', 'customer'])->latest()->limit(8)->get(),
             'days' => $days,
         ]);
