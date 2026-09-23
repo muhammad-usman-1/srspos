@@ -13,6 +13,8 @@ use App\Http\Controllers\Pos\CartController;
 use App\Http\Controllers\Pos\OrderController;
 use App\Http\Controllers\Pos\PosSyncController;
 use App\Http\Controllers\Settings\SettingController;
+use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\SuperAdmin\StoreController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
@@ -62,6 +64,8 @@ Route::prefix('admin')->middleware(['auth', 'locale', 'store.access'])->group(fu
     Route::middleware('stock.tracked')->group(function (): void {
         Route::get('/purchases/data', [PurchaseController::class, 'data'])->name('purchases.data');
         Route::get('/purchases/{purchase}/receipt', [PurchaseController::class, 'receipt'])->name('purchases.receipt');
+        Route::post('/purchases/{purchase}/status', [PurchaseController::class, 'updateStatus'])->name('purchases.status');
+        Route::post('/purchases/{purchase}/payments', [PurchaseController::class, 'addPayment'])->name('purchases.payments.store');
         Route::resource('purchases', PurchaseController::class);
 
         // Purchase Cart API
@@ -91,6 +95,10 @@ Route::prefix('admin')->middleware(['auth', 'locale', 'store.access'])->group(fu
         Route::get('/stock/movements', [StockController::class, 'movements'])->name('stock.movements');
         Route::post('/stock/{product}/adjust', [StockController::class, 'adjust'])->name('stock.adjust');
     });
+
+    // Reports & activity (audit trail)
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/activity', [ActivityLogController::class, 'index'])->name('activity.index');
 
     // Orders
     Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');

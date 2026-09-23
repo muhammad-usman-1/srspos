@@ -24,7 +24,7 @@ class PurchaseUpdateRequest extends FormRequest
         return [
             'supplier_id' => ['required', \Illuminate\Validation\Rule::exists('suppliers', 'id')->where('store_id', auth()->user()->store_id)],
             'purchase_date' => 'required|date',
-            'total_amount' => 'required|numeric|min:0',
+            'reference_no' => 'nullable|string|max:100',
             'status' => 'required|in:pending,completed,cancelled',
             'notes' => 'nullable|string|max:1000',
         ];

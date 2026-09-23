@@ -2,7 +2,7 @@
  * - The POS page (/admin/cart) is network-first, falling back to the last copy.
  * - Scripts, styles, fonts and images are cached as they are used.
  * - API calls (axios/fetch JSON) are never cached; the app keeps its own local data. */
-const VERSION = 'pos-v9';
+const VERSION = 'pos-v10';
 const CACHE = 'pos-cache-' + VERSION;
 const POS_PAGE = '/admin/cart';
 

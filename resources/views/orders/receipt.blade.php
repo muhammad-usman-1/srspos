@@ -66,7 +66,7 @@
         <div class="title">{{ strtoupper(config('settings.receipt_title') ?: 'Original Sales Invoice') }}</div>
     </div>
     <div class="meta"><span>Date &amp; Time: {{ $order->created_at->format('d-M-y') }}</span><span>{{ $order->created_at->format('h:i:s A') }}</span></div>
-    <div class="meta"><span>Cashier: {{ $order->user?->getFullname() ?? '-' }}</span><span>Bill No: <b>{{ $order->id }}</b></span></div>
+    <div class="meta"><span>Cashier: {{ $order->user?->getFullname() ?? '-' }}</span><span>Invoice No: <b>{{ $order->id }}</b></span></div>
     @if($order->customer)
         <div class="meta"><span>Customer: {{ $order->getCustomerName() }}</span></div>
     @endif

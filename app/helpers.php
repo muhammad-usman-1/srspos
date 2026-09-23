@@ -60,3 +60,29 @@ if (!function_exists('has_custom_logo')) {
         return $logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($logo);
     }
 }
+
+if (!function_exists('activity_log')) {
+    /**
+     * Record something that happened in the store for the activity / audit trail.
+     * Never throws: a logging failure must not break a sale or a purchase.
+     *
+     * @param  string  $subjectType  short type: order, purchase, product, ...
+     */
+    function activity_log(string $action, string $description, ?string $subjectType = null, ?int $subjectId = null, array $properties = []): void
+    {
+        try {
+            \App\Models\ActivityLog::create([
+                'store_id' => auth()->user()?->store_id,
+                'user_id' => auth()->id(),
+                'action' => $action,
+                'subject_type' => $subjectType,
+                'subject_id' => $subjectId,
+                'description' => mb_substr($description, 0, 255),
+                'properties' => $properties ?: null,
+                'ip_address' => request()?->ip(),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+}

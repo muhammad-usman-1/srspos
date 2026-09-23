@@ -64,16 +64,24 @@ class StockController extends Controller
             return back()->with('error', __('No change in stock.'));
         }
 
-        if ($data['mode'] === 'add' && isset($data['purchase_price'])) {
-            $product->forceFill(['purchase_price' => $data['purchase_price']])->save();
-        }
-
         $type = match ($data['mode']) {
             'add' => 'stock_in',
             'remove' => 'stock_out',
             'set' => 'adjustment',
         };
-        $product->adjustStock($delta, $type, null, $data['note'] ?? null);
+        $before = $product->quantity;
+        $oldCost = $product->purchase_price;
+
+        if ($data['mode'] === 'add' && isset($data['purchase_price'])) {
+            // New stock at a known cost: cost becomes the weighted average (used for profit).
+            $product->receiveStock($delta, (float) $data['purchase_price'], $type, null, $data['note'] ?? null);
+        } else {
+            $product->adjustStock($delta, $type, null, $data['note'] ?? null);
+        }
+
+        activity_log('stock.adjusted', sprintf('Stock of "%s" %s %d -> %d (%+d)%s%s', $product->name, $data['mode'], $before, $product->quantity, $delta,
+            ($oldCost != $product->purchase_price) ? sprintf(', cost %s -> %s', number_format((float) $oldCost, 2), number_format((float) $product->purchase_price, 2)) : '',
+            !empty($data['note']) ? ' — ' . $data['note'] : ''), 'product', $product->id);
 
         return back()->with('success', __(':name stock updated to :qty.', ['name' => $product->name, 'qty' => $product->quantity]));
     }

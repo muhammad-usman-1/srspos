@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Purchase\PurchaseStoreRequest;
 use App\Http\Requests\Purchase\PurchaseUpdateRequest;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Supplier;
@@ -13,214 +14,286 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
+/**
+ * Purchases from suppliers: what was bought, when, how many, at what cost, what has
+ * been paid to the supplier and what is still owed. A purchase adds stock only once it
+ * is "completed" (received); receiving stock moves the product cost to the weighted
+ * average cost, which is the cost used for profit.
+ */
 class PurchaseController extends Controller
 {
-    /**
-     * Display a listing of purchases with filters
-     */
+    private const SORTABLE = ['purchase_date', 'id', 'total_amount', 'status', 'created_at'];
+
     public function index(Request $request): View
     {
-        $purchases = Purchase::with(['supplier', 'user', 'items'])
-            ->filter($request->only(['status', 'supplier_id', 'date_from', 'date_to', 'search']))
-            ->orderBy($request->get('sort_by', 'purchase_date'), $request->get('sort_order', 'desc'))
-            ->paginate(10)
+        $filters = $request->only(['status', 'supplier_id', 'date_from', 'date_to', 'search']);
+
+        $base = Purchase::query()->filter($filters);
+
+        $purchases = (clone $base)
+            ->with(['supplier', 'user'])
+            ->withCount('items')
+            ->withSum('payments', 'amount')
+            ->orderBy($this->sortColumn($request), $request->get('sort_order') === 'asc' ? 'asc' : 'desc')
+            ->orderByDesc('id')
+            ->paginate(15)
             ->withQueryString();
 
-        $suppliers = Supplier::orderBy('first_name')->get();
+        // Totals for everything matching the filters (not just this page); cancelled ones cost nothing.
+        $active = (clone $base)->where('status', '!=', 'cancelled');
+        $totalAmount = (float) (clone $active)->sum('total_amount');
+        $totalPaid = (float) DB::table('purchase_payments')->whereIn('purchase_id', (clone $active)->select('id'))->sum('amount');
 
-        return view('purchases.index', ['purchases' => $purchases, 'suppliers' => $suppliers]);
+        return view('purchases.index', [
+            'purchases' => $purchases,
+            'suppliers' => Supplier::orderBy('first_name')->get(),
+            'summary' => [
+                'count' => (clone $base)->count(),
+                'total' => $totalAmount,
+                'paid' => $totalPaid,
+                'due' => max($totalAmount - $totalPaid, 0),
+            ],
+        ]);
     }
 
-    /**
-     * Get purchases data as JSON for AJAX filtering
-     */
+    /** JSON list (kept for API/AJAX use). */
     public function data(Request $request): JsonResponse
     {
-        try {
-            $purchases = Purchase::with(['supplier', 'user'])
-                ->withCount('items')
-                ->filter($request->only(['status', 'supplier_id', 'date_from', 'date_to', 'search']))
-                ->orderBy($request->get('sort_by', 'purchase_date'), $request->get('sort_order', 'desc'))
-                ->paginate(10);
+        $purchases = Purchase::with(['supplier', 'user'])
+            ->withCount('items')
+            ->withSum('payments', 'amount')
+            ->filter($request->only(['status', 'supplier_id', 'date_from', 'date_to', 'search']))
+            ->orderBy($this->sortColumn($request), $request->get('sort_order') === 'asc' ? 'asc' : 'desc')
+            ->paginate(10);
 
-            return response()->json($purchases);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile()
-            ], 500);
-        }
+        return response()->json($purchases);
     }
 
-    /**
-     * Show the form for creating a new purchase
-     */
     public function create(): View
     {
-        $suppliers = Supplier::all();
-
-        return view('purchases.create', ['suppliers' => $suppliers]);
+        return view('purchases.create', ['suppliers' => Supplier::all()]);
     }
 
-    /**
-     * Store a newly created purchase
-     */
-    public function store(PurchaseStoreRequest $request): RedirectResponse
+    public function store(PurchaseStoreRequest $request): RedirectResponse|JsonResponse
     {
         try {
-            DB::beginTransaction();
+            $purchase = DB::transaction(function () use ($request): Purchase {
+                // The total is always worked out here from the lines, never trusted from the browser.
+                $items = collect($request->items)->map(fn(array $i): array => [
+                    'product_id' => (int) $i['product_id'],
+                    'quantity' => (int) $i['quantity'],
+                    'purchase_price' => round((float) $i['purchase_price'], 2),
+                ]);
+                $total = round($items->sum(fn(array $i): float => $i['quantity'] * $i['purchase_price']), 2);
 
-            // Create purchase
-            $purchase = Purchase::create([
-                'supplier_id' => $request->supplier_id,
-                'user_id' => Auth::id(),
-                'purchase_date' => $request->purchase_date,
-                'total_amount' => $request->total_amount,
-                'status' => $request->status ?? 'pending',
-                'notes' => $request->notes,
-            ]);
-
-            // Create purchase items
-            foreach ($request->items as $item) {
-                $purchase->items()->create([
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'purchase_price' => $item['purchase_price'],
+                $purchase = Purchase::create([
+                    'supplier_id' => $request->supplier_id,
+                    'user_id' => Auth::id(),
+                    'purchase_date' => $request->purchase_date,
+                    'reference_no' => $request->reference_no,
+                    'total_amount' => $total,
+                    'status' => $request->status ?? 'pending',
+                    'notes' => $request->notes,
                 ]);
 
-                // If status is completed, update stock and purchase price
-                if ($request->status === 'completed') {
-                    $product = Product::find($item['product_id']);
-                    $product->purchase_price = $item['purchase_price'];
-                    $product->save();
-                    $product->adjustStock((int) $item['quantity'], 'purchase', 'Purchase #' . $purchase->id);
+                foreach ($items as $item) {
+                    $purchase->items()->create($item);
+                    if ($purchase->status === 'completed') {
+                        Product::findOrFail($item['product_id'])
+                            ->receiveStock($item['quantity'], $item['purchase_price'], 'purchase', 'Purchase #' . $purchase->id);
+                    }
                 }
-            }
 
-            DB::commit();
+                $paid = min(round((float) $request->input('paid_amount', 0), 2), $total);
+                if ($paid > 0 && $purchase->status !== 'cancelled') {
+                    $purchase->payments()->create([
+                        'user_id' => Auth::id(),
+                        'amount' => $paid,
+                        'method' => $this->method($request->input('payment_method')),
+                        'note' => __('Paid when the purchase was entered'),
+                    ]);
+                }
 
-            // Clear purchase cart
+                activity_log('purchase.created', sprintf('Purchase #%d from %s: %d items, total %s, paid %s, status %s%s',
+                    $purchase->id, $purchase->supplier?->first_name . ' ' . $purchase->supplier?->last_name, $items->sum('quantity'),
+                    number_format($total, 2), number_format($paid, 2), $purchase->status,
+                    $purchase->reference_no ? ', invoice ' . $purchase->reference_no : ''), 'purchase', $purchase->id);
+
+                return $purchase;
+            });
+
             $request->user()->purchaseCart()->detach();
 
-            return redirect()->route('purchases.index')
-                ->with('success', __('Purchase created successfully!'));
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'purchase_id' => $purchase->id, 'url' => route('purchases.show', $purchase)]);
+            }
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+            return redirect()->route('purchases.show', $purchase)->with('success', __('Purchase created successfully!'));
+        } catch (\Throwable $e) {
+            report($e);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => __('Failed to create purchase: ') . $e->getMessage()], 422);
+            }
 
-            return redirect()->back()
-                ->with('error', __('Failed to create purchase: ') . $e->getMessage())
-                ->withInput();
+            return back()->with('error', __('Failed to create purchase: ') . $e->getMessage())->withInput();
         }
     }
 
-    /**
-     * Display the specified purchase
-     */
     public function show(Purchase $purchase): View
     {
-        $purchase->load(['supplier', 'user', 'items.product']);
+        $purchase->load(['supplier', 'user', 'items.product', 'payments.user']);
 
-        return view('purchases.show', ['purchase' => $purchase]);
+        return view('purchases.show', [
+            'purchase' => $purchase,
+            'methods' => Payment::METHODS,
+            'movements' => \App\Models\StockMovement::with('product')
+                ->where(fn($q) => $q->where('reference', 'Purchase #' . $purchase->id)
+                    ->orWhere('reference', 'like', 'Purchase #' . $purchase->id . ' %'))
+                ->latest('id')->get(),
+        ]);
     }
 
-    /**
-     * Update the specified purchase
-     */
     public function update(PurchaseUpdateRequest $request, Purchase $purchase): RedirectResponse
     {
         try {
-            DB::beginTransaction();
+            DB::transaction(function () use ($request, $purchase): void {
+                $purchase->update([
+                    'supplier_id' => $request->supplier_id,
+                    'purchase_date' => $request->purchase_date,
+                    'reference_no' => $request->reference_no,
+                    'notes' => $request->notes,
+                ]);
+                $this->changeStatus($purchase, $request->status);
+            });
 
-            $oldStatus = $purchase->status;
-            $newStatus = $request->status;
-
-            // Update purchase
-            $purchase->update([
-                'supplier_id' => $request->supplier_id,
-                'purchase_date' => $request->purchase_date,
-                'total_amount' => $request->total_amount,
-                'status' => $newStatus,
-                'notes' => $request->notes,
-            ]);
-
-            // Handle stock changes based on status transition
-            if ($oldStatus !== $newStatus) {
-                foreach ($purchase->items as $item) {
-                    $product = $item->product;
-
-                    // If changing from completed to pending/cancelled: decrease stock
-                    if ($oldStatus === 'completed' && in_array($newStatus, ['pending', 'cancelled'])) {
-                        $product->adjustStock(-$item->quantity, 'purchase_reversal', 'Purchase #' . $purchase->id);
-                    }
-
-                    // If changing from pending/cancelled to completed: increase stock
-                    if (in_array($oldStatus, ['pending', 'cancelled']) && $newStatus === 'completed') {
-                        $product->purchase_price = $item->purchase_price;
-                        $product->save();
-                        $product->adjustStock($item->quantity, 'purchase', 'Purchase #' . $purchase->id);
-                    }
-                }
-            }
-
-            DB::commit();
-
-            return redirect()->route('purchases.index')
-                ->with('success', __('Purchase updated successfully!'));
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return redirect()->back()
-                ->with('error', __('Failed to update purchase: ') . $e->getMessage())
-                ->withInput();
+            return redirect()->route('purchases.show', $purchase)->with('success', __('Purchase updated successfully!'));
+        } catch (\Throwable $e) {
+            return back()->with('error', __('Failed to update purchase: ') . $e->getMessage())->withInput();
         }
     }
 
-    /**
-     * Remove the specified purchase
-     */
-    public function destroy(Purchase $purchase): RedirectResponse
+    /** Receive (complete), put back to pending, or cancel a purchase. */
+    public function updateStatus(Request $request, Purchase $purchase): RedirectResponse
+    {
+        $request->validate(['status' => ['required', 'in:pending,completed,cancelled']]);
+
+        try {
+            DB::transaction(fn() => $this->changeStatus($purchase, $request->input('status')));
+
+            return back()->with('success', __('Purchase #:id is now :status.', ['id' => $purchase->id, 'status' => __($purchase->status)]));
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /** Record a payment made to the supplier against this purchase. */
+    public function addPayment(Request $request, Purchase $purchase): RedirectResponse
+    {
+        $due = $purchase->dueAmount();
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0.01', 'max:' . max($due, 0.01)],
+            'method' => ['required', Rule::in(array_keys(Payment::METHODS))],
+            'note' => ['nullable', 'string', 'max:255'],
+        ], ['amount.max' => __('Only :due is still owed on this purchase.', ['due' => number_format($due, 2)])]);
+
+        if ($purchase->status === 'cancelled') {
+            return back()->with('error', __('A cancelled purchase cannot take payments.'));
+        }
+
+        $purchase->payments()->create([
+            'user_id' => Auth::id(),
+            'amount' => round((float) $data['amount'], 2),
+            'method' => $data['method'],
+            'note' => $data['note'] ?? null,
+        ]);
+
+        activity_log('purchase.payment', sprintf('Paid %s (%s) to supplier for purchase #%d, still owed %s',
+            number_format((float) $data['amount'], 2), Payment::METHODS[$data['method']], $purchase->id,
+            number_format($purchase->fresh()->dueAmount(), 2)), 'purchase', $purchase->id);
+
+        return back()->with('success', __('Payment recorded.'));
+    }
+
+    public function destroy(Request $request, Purchase $purchase): RedirectResponse|JsonResponse
     {
         try {
-            DB::beginTransaction();
-
-            // If purchase was completed, reverse stock changes
-            if ($purchase->status === 'completed') {
-                foreach ($purchase->items as $item) {
-                    $item->product->adjustStock(-$item->quantity, 'purchase_reversal', 'Purchase #' . $purchase->id . ' deleted');
+            DB::transaction(function () use ($purchase): void {
+                if ($purchase->status === 'completed') {
+                    foreach ($purchase->items as $item) {
+                        $item->product?->adjustStock(-$item->quantity, 'purchase_reversal', 'Purchase #' . $purchase->id . ' deleted');
+                    }
                 }
+                activity_log('purchase.deleted', sprintf('Purchase #%d (total %s, status %s) deleted%s', $purchase->id,
+                    number_format((float) $purchase->total_amount, 2), $purchase->status,
+                    $purchase->status === 'completed' ? ' — its stock was taken back out' : ''), 'purchase', null);
+                $purchase->delete();
+            });
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true]);
             }
 
-            $purchase->delete();
+            return redirect()->route('purchases.index')->with('success', __('Purchase deleted successfully!'));
+        } catch (\Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
 
-            DB::commit();
-
-            return redirect()->route('purchases.index')
-                ->with('success', __('Purchase deleted successfully!'));
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return redirect()->back()
-                ->with('error', __('Failed to delete purchase: ') . $e->getMessage());
+            return back()->with('error', __('Failed to delete purchase: ') . $e->getMessage());
         }
     }
 
-    /**
-     * Generate 80mm thermal receipt PDF
-     */
+    /** 80mm thermal receipt PDF */
     public function receipt(Purchase $purchase)
     {
-        $purchase->load(['supplier', 'user', 'items.product']);
+        $purchase->load(['supplier', 'user', 'items.product', 'payments']);
 
         $pdf = app('dompdf.wrapper');
         $pdf->loadView('purchases.receipt', ['purchase' => $purchase]);
         $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait'); // 80mm width
 
         return $pdf->stream("purchase-receipt-{$purchase->id}.pdf");
+    }
+
+    /**
+     * Apply a status change and its stock effect: completed adds the stock (at weighted
+     * average cost), moving away from completed takes it back out.
+     */
+    private function changeStatus(Purchase $purchase, string $newStatus): void
+    {
+        $oldStatus = $purchase->status;
+        if ($oldStatus === $newStatus) {
+            return;
+        }
+
+        foreach ($purchase->items()->with('product')->get() as $item) {
+            if (!$item->product) {
+                continue;
+            }
+            if ($oldStatus === 'completed') {
+                $item->product->adjustStock(-$item->quantity, 'purchase_reversal', 'Purchase #' . $purchase->id . ' ' . $newStatus);
+            } elseif ($newStatus === 'completed') {
+                $item->product->receiveStock($item->quantity, (float) $item->purchase_price, 'purchase', 'Purchase #' . $purchase->id);
+            }
+        }
+
+        $purchase->update(['status' => $newStatus]);
+
+        activity_log('purchase.status', sprintf('Purchase #%d status %s -> %s%s', $purchase->id, $oldStatus, $newStatus,
+            $newStatus === 'completed' ? ' (stock received)' : ($oldStatus === 'completed' ? ' (stock taken back out)' : '')),
+            'purchase', $purchase->id);
+    }
+
+    private function sortColumn(Request $request): string
+    {
+        return in_array($request->get('sort_by'), self::SORTABLE, true) ? $request->get('sort_by') : 'purchase_date';
+    }
+
+    private function method(?string $method): string
+    {
+        return array_key_exists((string) $method, Payment::METHODS) ? $method : 'cash';
     }
 }

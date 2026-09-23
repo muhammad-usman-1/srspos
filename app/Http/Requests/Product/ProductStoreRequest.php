@@ -19,6 +19,8 @@ class ProductStoreRequest extends FormRequest
             'image' => ['nullable', 'image', 'max:2048'], // 2MB max
             'barcode' => ['required', 'string', 'max:50', \Illuminate\Validation\Rule::unique('products', 'barcode')->where('store_id', auth()->user()->store_id)],
             'price' => ['required', 'numeric', 'min:0', 'decimal:0,2'],
+            // Cost price is what the product costs the store; needed for profit when stock is tracked.
+            'purchase_price' => store_tracks_stock() ? ['required', 'numeric', 'min:0', 'decimal:0,2'] : ['nullable', 'numeric', 'min:0', 'decimal:0,2'],
             'mkt_price' => ['nullable', 'numeric', 'min:0', 'decimal:0,2'],
             // Stores in "simple" stock mode never show or need a quantity.
             'quantity' => store_tracks_stock() ? ['required', 'integer', 'min:0'] : ['sometimes'],
@@ -34,6 +36,7 @@ class ProductStoreRequest extends FormRequest
             'barcode.unique' => __('product.validation.barcode_unique'),
             'price.required' => __('product.validation.price_required'),
             'price.decimal' => __('product.validation.price_decimal'),
+            'purchase_price.required' => __('Cost price is required.'),
             'quantity.required' => __('product.validation.quantity_required'),
             'quantity.min' => __('product.validation.quantity_min'),
             'image.max' => __('product.validation.image_max'),

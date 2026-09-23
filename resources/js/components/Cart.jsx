@@ -110,7 +110,7 @@ table{width:100%;border-collapse:collapse}
   <div class="title">${esc((s.receipt_title || "Original Sales Invoice").toUpperCase())}</div>
 </div>
 <div class="meta"><span>Date &amp; Time: ${date}</span><span>${time}</span></div>
-<div class="meta"><span>Cashier: ${esc(cashier)}</span><span>Bill No: <b>${esc(billNo)}</b></span></div>
+<div class="meta"><span>Cashier: ${esc(cashier)}</span><span>Invoice No: <b>${esc(billNo)}</b></span></div>
 ${sale.customer_name ? `<div class="meta"><span>Customer: ${esc(sale.customer_name)}</span></div>` : ""}
 <table class="items"><colgroup><col style="width:46%"><col style="width:17%"><col style="width:17%"><col style="width:20%"></colgroup>
 <thead><tr><th class="l" colspan="3">No. &nbsp;Item Name / Barcode</th><th>Amount</th></tr>

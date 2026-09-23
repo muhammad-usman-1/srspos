@@ -61,6 +61,7 @@ class Product extends Model
         'image',
         'barcode',
         'price',
+        'purchase_price',
         'mkt_price',
         'quantity',
         'status'
@@ -68,6 +69,7 @@ class Product extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'purchase_price' => 'decimal:2',
         'quantity' => 'integer',
         'status' => 'boolean',
     ];
@@ -88,6 +90,30 @@ class Product extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    /**
+     * Receive stock bought at $unitCost and move the product's cost to the weighted
+     * average of what is already on the shelf and what just arrived, e.g. 10 in stock
+     * at 100 + 10 bought at 120 -> cost 110. That average is the cost used for profit.
+     */
+    public function receiveStock(int $qty, float $unitCost, string $type, ?string $reference = null, ?string $note = null): StockMovement
+    {
+        return DB::transaction(function () use ($qty, $unitCost, $type, $reference, $note): StockMovement {
+            $locked = static::query()->lockForUpdate()->findOrFail($this->id);
+            $onHand = max((int) $locked->quantity, 0);
+            $oldCost = $locked->purchase_price !== null ? (float) $locked->purchase_price : null;
+
+            $newCost = ($oldCost === null || $onHand === 0)
+                ? $unitCost
+                : (($onHand * $oldCost) + ($qty * $unitCost)) / ($onHand + $qty);
+
+            $locked->forceFill(['purchase_price' => round($newCost, 2)])->save();
+            $this->purchase_price = $locked->purchase_price;
+            $this->syncOriginalAttribute('purchase_price');
+
+            return $this->adjustStock($qty, $type, $reference, $note);
+        });
     }
 
     /**

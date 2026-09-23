@@ -50,6 +50,7 @@ trait PurchaseScopes
 
         return $query->where(function ($q) use ($search): void {
             $q->where('id', 'like', "%{$search}%")
+                ->orWhere('reference_no', 'like', "%{$search}%")
                 ->orWhere('notes', 'like', "%{$search}%");
         });
     }

@@ -60,16 +60,36 @@
                 @enderror
             </div>
 
+            @if(store_tracks_stock())
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="purchase_price">{{ __('Cost price') }} <small class="text-muted">({{ __('what it costs you — never shown to customers') }})</small></label>
+                    <input type="number" step="0.01" min="0" name="purchase_price" class="form-control @error('purchase_price') is-invalid @enderror" id="purchase_price"
+                        placeholder="0.00" value="{{ old('purchase_price', $product->purchase_price) }}">
+                    @error('purchase_price')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="price">{{ __('Sale price') }} <small class="text-muted">({{ __('printed on the bill') }})</small></label>
+                    <input type="number" step="0.01" min="0" name="price" class="form-control @error('price') is-invalid @enderror" id="price"
+                        placeholder="0.00" value="{{ old('price', $product->price) }}">
+                    @error('price')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                </div>
+            </div>
+            <div class="mb-3 small" id="margin-hint"></div>
+            @else
             <div class="form-group">
-                <label for="price">{{ __('product.Price') }}</label>
-                <input type="text" name="price" class="form-control @error('price') is-invalid @enderror" id="price"
-                    placeholder="{{ __('product.Price') }}" value="{{ old('price', $product->price) }}">
+                <label for="price">{{ __('Sale price') }}</label>
+                <input type="number" step="0.01" min="0" name="price" class="form-control @error('price') is-invalid @enderror" id="price"
+                    placeholder="0.00" value="{{ old('price', $product->price) }}">
                 @error('price')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
+                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                 @enderror
             </div>
+            @endif
 
             <div class="form-group">
                 <label for="mkt_price">{{ __('Market Price (MKT) - optional') }}</label>
@@ -116,10 +136,27 @@
 
 @section('js')
 <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
-<script>
+{{-- module script: runs after the app bundle (which provides jQuery) has loaded --}}
+<script type="module">
     $(document).ready(function () {
         bsCustomFileInput.init();
     });
+
+    // Live profit per unit / margin while typing cost and sale price
+    (function () {
+        var cost = document.getElementById('purchase_price'), sale = document.getElementById('price'), out = document.getElementById('margin-hint');
+        if (!cost || !sale || !out) return;
+        var cur = @json(config('settings.currency_symbol'));
+        function update() {
+            var c = parseFloat(cost.value), s = parseFloat(sale.value);
+            if (isNaN(c) || isNaN(s)) { out.innerHTML = ''; return; }
+            var p = s - c, m = s > 0 ? (p / s * 100) : 0;
+            out.className = 'mb-3 small font-weight-bold ' + (p < 0 ? 'text-danger' : 'text-success');
+            out.textContent = (p < 0 ? 'Loss' : 'Profit') + ' per unit: ' + cur + ' ' + p.toFixed(2) + ' (' + m.toFixed(1) + '% margin)'
+                + (p < 0 ? ' — sale price is below cost' : '');
+        }
+        cost.addEventListener('input', update); sale.addEventListener('input', update); update();
+    })();
 
     // Auto-capitalize the first letter of each word as the admin types (e.g. "coca cola" -> "Coca Cola")
     document.getElementById('name').addEventListener('input', function (e) {

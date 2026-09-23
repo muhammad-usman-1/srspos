@@ -16,6 +16,9 @@ class Purchase extends Component {
             purchase_date: new Date().toISOString().split('T')[0],
             status: "completed",
             notes: "",
+            reference_no: "",
+            paid_amount: "",
+            payment_method: "cash",
             translations: {},
         };
 
@@ -244,7 +247,7 @@ class Purchase extends Component {
     }
 
     handleClickSubmit() {
-        const { supplier_id, purchase_date, status, notes, cart, suppliers } = this.state;
+        const { supplier_id, purchase_date, status, notes, cart, suppliers, reference_no, paid_amount, payment_method } = this.state;
 
         // Validation
         if (!supplier_id) {
@@ -258,6 +261,8 @@ class Purchase extends Component {
         }
 
         const total_amount = this.getTotal(cart);
+        const paid = Math.min(parseFloat(paid_amount) || 0, parseFloat(total_amount) || 0);
+        const cur = window.APP.currency_symbol;
         const items = cart.map(c => ({
             product_id: c.id,
             quantity: c.pivot.quantity,
@@ -275,8 +280,10 @@ class Purchase extends Component {
                 <div style="text-align: left;">
                     <p><strong>Supplier:</strong> ${supplierName}</p>
                     <p><strong>Date:</strong> ${purchase_date}</p>
-                    <p><strong>Total Amount:</strong> ${window.APP.currency_symbol} ${total_amount}</p>
-                    <p><strong>Status:</strong> ${status}</p>
+                    ${reference_no ? `<p><strong>Supplier invoice #:</strong> ${reference_no}</p>` : ""}
+                    <p><strong>Total Amount:</strong> ${cur} ${total_amount}</p>
+                    <p><strong>Paid now:</strong> ${cur} ${paid.toFixed(2)} &nbsp; <strong>Owed to supplier:</strong> ${cur} ${(total_amount - paid).toFixed(2)}</p>
+                    <p><strong>Status:</strong> ${status}${status === "completed" ? " (stock will be added now)" : status === "pending" ? " (stock is added when you mark it received)" : ""}</p>
                 </div>
             `,
             showCancelButton: true,
@@ -288,22 +295,31 @@ class Purchase extends Component {
                     .post("/admin/purchases", {
                         supplier_id,
                         purchase_date,
-                        total_amount,
+                        reference_no,
                         status,
                         notes,
+                        paid_amount: paid,
+                        payment_method,
                         items
-                    })
+                    }, { headers: { Accept: "application/json" } })
                     .then((res) => {
                         this.loadCart();
                         return res.data;
                     })
                     .catch((err) => {
-                        Swal.showValidationMessage(err.response?.data?.message || "Failed to create purchase");
+                        const errors = err.response?.data?.errors;
+                        Swal.showValidationMessage(
+                            (errors && Object.values(errors)[0]?.[0]) || err.response?.data?.message || "Failed to create purchase"
+                        );
                     });
             },
             allowOutsideClick: () => !Swal.isLoading(),
         }).then((result) => {
             if (result.value) {
+                if (result.value.url) {
+                    window.location.href = result.value.url;
+                    return;
+                }
                 Swal.fire("Success!", "Purchase created successfully!", "success");
                 // Clear form
                 this.setState({
@@ -311,7 +327,9 @@ class Purchase extends Component {
                     supplier_id: "",
                     purchase_date: new Date().toISOString().split('T')[0],
                     status: "completed",
-                    notes: ""
+                    notes: "",
+                    reference_no: "",
+                    paid_amount: ""
                 });
             }
         });
@@ -327,6 +345,9 @@ class Purchase extends Component {
             purchase_date,
             status,
             notes,
+            reference_no,
+            paid_amount,
+            payment_method,
             translations = {}
         } = this.state;
 
@@ -403,6 +424,17 @@ class Purchase extends Component {
                                         className="form-control"
                                         value={purchase_date}
                                         onChange={this.handleDateChange}
+                                    />
+                                </div>
+                                <div className="form-group mb-0">
+                                    <label>Supplier Invoice # <small className="text-muted">(optional)</small></label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        maxLength={100}
+                                        placeholder="e.g. INV-2045"
+                                        value={reference_no}
+                                        onChange={(e) => this.setState({ reference_no: e.target.value })}
                                     />
                                 </div>
                             </div>
@@ -551,6 +583,54 @@ class Purchase extends Component {
                                             </label>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Payment to supplier */}
+                        {cart.length > 0 && status !== "cancelled" && (
+                            <div className="card">
+                                <div className="card-body">
+                                    <label className="small font-weight-bold mb-2">
+                                        <i className="fas fa-money-bill-wave mr-1"></i>Paid to supplier now
+                                    </label>
+                                    <div className="input-group input-group-sm">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            className="form-control"
+                                            placeholder="0.00"
+                                            value={paid_amount}
+                                            onChange={(e) => this.setState({ paid_amount: e.target.value })}
+                                        />
+                                        <select
+                                            className="form-control"
+                                            style={{ maxWidth: 130 }}
+                                            value={payment_method}
+                                            onChange={(e) => this.setState({ payment_method: e.target.value })}
+                                        >
+                                            <option value="cash">Cash</option>
+                                            <option value="bank_transfer">Bank Transfer</option>
+                                            <option value="card">Card</option>
+                                            <option value="easypaisa">EasyPaisa</option>
+                                            <option value="jazzcash">JazzCash</option>
+                                        </select>
+                                        <div className="input-group-append">
+                                            <button
+                                                type="button"
+                                                className="btn btn-outline-secondary"
+                                                onClick={() => this.setState({ paid_amount: this.getTotal(cart) })}
+                                            >
+                                                Full
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <small className="text-muted d-block mt-1">
+                                        Owed to supplier: {window.APP.currency_symbol}{" "}
+                                        {Math.max((parseFloat(this.getTotal(cart)) || 0) - (parseFloat(paid_amount) || 0), 0).toFixed(2)}
+                                        {" "}— record later payments on the purchase page.
+                                    </small>
                                 </div>
                             </div>
                         )}

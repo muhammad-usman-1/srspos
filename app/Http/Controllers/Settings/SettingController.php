@@ -61,6 +61,8 @@ class SettingController extends Controller
             Setting::where('key', 'bill_logo')->where('store_id', $storeId)->delete();
         }
 
+        activity_log('settings.updated', 'Settings saved' . ($request->filled('stock_mode') && $store?->stock_mode === $request->input('stock_mode') ? ' (stock mode set to ' . $store->stock_mode . ')' : ''));
+
         return redirect()->route('settings.index')->with('success', __('Settings saved.'));
     }
 }

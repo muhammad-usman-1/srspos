@@ -33,6 +33,7 @@ class OrderItem extends Model
 {
     protected $fillable = [
         'price',
+        'cost_price',
         'mkt_price',
         'quantity',
         'product_id',
@@ -41,6 +42,7 @@ class OrderItem extends Model
 
     protected $casts = [
         'price' => 'float',
+        'cost_price' => 'float',
         'quantity' => 'integer',
     ];
 
@@ -66,6 +68,12 @@ class OrderItem extends Model
     public function subtotal(): float
     {
         return $this->price;
+    }
+
+    /** Cost of this line (unit cost frozen at sale time x quantity); null when the cost was unknown. */
+    public function lineCost(): ?float
+    {
+        return $this->cost_price === null ? null : round($this->cost_price * $this->quantity, 2);
     }
 
     /**

@@ -24,7 +24,11 @@ class PurchaseStoreRequest extends FormRequest
         return [
             'supplier_id' => ['required', \Illuminate\Validation\Rule::exists('suppliers', 'id')->where('store_id', auth()->user()->store_id)],
             'purchase_date' => 'required|date',
-            'total_amount' => 'required|numeric|min:0',
+            // the total is recalculated from the items on the server; this is only accepted for old clients
+            'total_amount' => 'nullable|numeric|min:0',
+            'reference_no' => 'nullable|string|max:100',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'payment_method' => ['nullable', \Illuminate\Validation\Rule::in(array_keys(\App\Models\Payment::METHODS))],
             'status' => 'required|in:pending,completed,cancelled',
             'notes' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',

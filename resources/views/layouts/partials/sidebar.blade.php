@@ -1,8 +1,8 @@
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="{{route('home')}}" class="brand-link" style="background:#fff;display:flex;align-items:center;justify-content:center;padding:8px 12px;height:57px">
-        <img src="{{ app_logo_url() }}" alt="{{ config('app.name') }}" style="object-fit:contain;max-width:100%;width:auto">
+    <a href="{{route('home')}}" class="brand-link" style="background:#fff;display:flex;align-items:center;justify-content:center;padding:6px 10px;height:57px;overflow:hidden">
+        <img src="{{ app_logo_url() }}" alt="{{ config('app.name') }}" style="display:block;margin:0 auto;max-height:70px;max-width:100%;width:auto;height:auto;object-fit:contain;object-position:center">
     </a>
 
     <!-- Sidebar -->
@@ -102,6 +102,20 @@
                     <a href="{{ route('suppliers.index') }}" class="nav-link {{ activeSegment('suppliers') }}">
                         <i class="nav-icon fas fa-truck"></i>
                         <p>{{ __('Supplier') }}</p>
+                    </a>
+                </li>
+
+                <li class="nav-header">{{ __('Reports') }}</li>
+                <li class="nav-item">
+                    <a href="{{ route('reports.index') }}" class="nav-link {{ activeSegment('reports') }}">
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <p>{{ store_tracks_stock() ? __('Sales & Profit') : __('Sales Report') }}</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('activity.index') }}" class="nav-link {{ activeSegment('activity') }}">
+                        <i class="nav-icon fas fa-history"></i>
+                        <p>{{ __('Activity Log') }}</p>
                     </a>
                 </li>
 

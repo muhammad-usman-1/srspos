@@ -56,6 +56,7 @@ class Purchase extends Model
         'supplier_id',
         'user_id',
         'purchase_date',
+        'reference_no',
         'total_amount',
         'status',
         'notes',
@@ -83,5 +84,26 @@ class Purchase extends Model
     public function items(): HasMany
     {
         return $this->hasMany(related: PurchaseItem::class, foreignKey: 'purchase_id');
+    }
+
+    /** Payments made to the supplier for this purchase. */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(PurchasePayment::class)->latest('id');
+    }
+
+    public function paidAmount(): float
+    {
+        if (array_key_exists('payments_sum_amount', $this->attributes)) {
+            return (float) $this->attributes['payments_sum_amount'];
+        }
+
+        return (float) ($this->relationLoaded('payments') ? $this->payments->sum('amount') : $this->payments()->sum('amount'));
+    }
+
+    /** Still owed to the supplier (a cancelled purchase owes nothing). */
+    public function dueAmount(): float
+    {
+        return $this->status === 'cancelled' ? 0.0 : max(round((float) $this->total_amount - $this->paidAmount(), 2), 0);
     }
 }

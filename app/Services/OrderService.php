@@ -66,6 +66,8 @@ class OrderService
                 $unit = isset($line['price']) ? (float) $line['price'] : (float) $product->price;
                 $order->items()->create([
                     'price' => $unit * $qty,
+                    // cost frozen at the moment of sale: used for profit, never printed on the bill
+                    'cost_price' => $product->purchase_price,
                     'mkt_price' => $line['mkt_price'] ?? $product->mkt_price,
                     'quantity' => $qty,
                     'product_id' => $product->id,
@@ -89,13 +91,25 @@ class OrderService
             $grandTotal = round($subtotal - $discount + $taxAmount, 2);
             $order->update(['discount' => $discount, 'tax_rate' => $taxRate, 'tax_amount' => $taxAmount]);
 
+            $method = array_key_exists((string) ($data['method'] ?? ''), Payment::METHODS) ? $data['method'] : 'cash';
+            $tendered = (float) $data['amount'];
             $order->payments()->create([
                 // Cash handed over beyond the bill is change, not revenue.
-                'amount' => min((float) $data['amount'], $grandTotal),
-                'tendered' => (float) $data['amount'],
-                'method' => array_key_exists((string) ($data['method'] ?? ''), Payment::METHODS) ? $data['method'] : 'cash',
+                'amount' => min($tendered, $grandTotal),
+                'tendered' => $tendered,
+                'method' => $method,
                 'user_id' => $user->id,
             ]);
+
+            activity_log(
+                'sale.created',
+                sprintf('Sale #%d%s: %s items, total %s, received %s (%s), change %s', $order->id,
+                    $order->offline_ref ? ' (' . $order->offline_ref . ')' : '',
+                    collect($data['items'])->sum('quantity'), number_format($grandTotal, 2), number_format($tendered, 2),
+                    Payment::METHODS[$method], number_format(max($tendered - $grandTotal, 0), 2)),
+                'order', $order->id,
+                ['total' => $grandTotal, 'tendered' => $tendered, 'change' => max(round($tendered - $grandTotal, 2), 0), 'method' => $method]
+            );
 
             return $order;
         });

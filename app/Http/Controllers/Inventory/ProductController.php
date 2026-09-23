@@ -61,6 +61,11 @@ class ProductController extends Controller
             $product->adjustStock($quantity, 'opening', null, 'Initial stock');
         }
 
+        activity_log('product.created', sprintf('Product "%s" created: sale price %s%s%s', $product->name,
+            number_format((float) $product->price, 2),
+            $product->purchase_price !== null ? ', cost ' . number_format((float) $product->purchase_price, 2) : '',
+            $quantity > 0 ? ', opening stock ' . $quantity : ''), 'product', $product->id);
+
         return redirect()->route('products.index')
             ->with('success', __('product.success_creating'));
     }
@@ -102,10 +107,22 @@ class ProductController extends Controller
         $newQuantity = (int) ($productData['quantity'] ?? $product->quantity);
         $delta = $newQuantity - $product->quantity;
         unset($productData['quantity']);
+
+        // Record what changed on prices, for the activity log.
+        $changes = [];
+        foreach (['price' => 'sale price', 'purchase_price' => 'cost'] as $field => $label) {
+            if (array_key_exists($field, $productData) && (float) $productData[$field] !== (float) $product->{$field}) {
+                $changes[] = sprintf('%s %s -> %s', $label, number_format((float) $product->{$field}, 2), number_format((float) $productData[$field], 2));
+            }
+        }
+
         $product->update($productData);
         if ($delta !== 0) {
             $product->adjustStock($delta, 'adjustment', null, 'Edited from product form');
+            $changes[] = sprintf('stock %+d (now %d)', $delta, $product->quantity);
         }
+
+        activity_log('product.updated', sprintf('Product "%s" updated%s', $product->name, $changes ? ': ' . implode(', ', $changes) : ''), 'product', $product->id);
 
         return redirect()->route('products.index')
             ->with('success', __('product.success_updating'));
@@ -116,9 +133,20 @@ class ProductController extends Controller
      */
     public function destroy(Product $product): JsonResponse
     {
+        // Deleting a product would cascade-delete its sale and purchase lines and wipe that
+        // history (and the profit figures) — keep it and let the admin mark it Inactive.
+        if (\App\Models\OrderItem::where('product_id', $product->id)->exists()
+            || \App\Models\PurchaseItem::where('product_id', $product->id)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => __('This product has sales or purchase history, so it cannot be deleted. Edit it and set Status to Inactive instead.'),
+            ], 422);
+        }
+
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
+        activity_log('product.deleted', sprintf('Product "%s" (%s) deleted', $product->name, $product->barcode), 'product', null);
         $product->delete();
 
         return response()->json(['success' => true]);

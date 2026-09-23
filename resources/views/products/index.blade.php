@@ -18,9 +18,13 @@
                     <th>{{ __('product.Name') }}</th>
                     <th>{{ __('product.Image') }}</th>
                     <th>{{ __('product.Barcode') }}</th>
-                    <th>{{ __('product.Price') }}</th>
                     @if(store_tracks_stock())
-                    <th>{{ __('product.Quantity') }}</th>
+                    <th class="text-right">{{ __('Cost') }}</th>
+                    <th class="text-right">{{ __('Sale price') }}</th>
+                    <th class="text-right">{{ __('Margin') }}</th>
+                    <th class="text-right">{{ __('product.Quantity') }}</th>
+                    @else
+                    <th class="text-right">{{ __('Sale price') }}</th>
                     @endif
                     <th>{{ __('product.Status') }}</th>
                     <th>{{ __('product.Created_At') }}</th>
@@ -35,9 +39,17 @@
                     <td>{{$product->name}}</td>
                     <td><img class="product-img" src="{{ Storage::url($product->image) }}" alt=""></td>
                     <td>{{$product->barcode}}</td>
-                    <td>{{$product->price}}</td>
                     @if(store_tracks_stock())
-                    <td>{{$product->quantity}}</td>
+                    @php $cost = $product->purchase_price; $margin = $cost !== null && $product->price > 0 ? ($product->price - $cost) / $product->price * 100 : null; @endphp
+                    <td class="text-right">{{ $cost !== null ? number_format($cost, 2) : '—' }}</td>
+                    <td class="text-right">{{ number_format($product->price, 2) }}</td>
+                    <td class="text-right">
+                        @if($margin === null)<span class="text-muted">—</span>
+                        @else<span class="{{ $margin < 0 ? 'text-danger' : 'text-success' }} font-weight-bold">{{ number_format($margin, 1) }}%</span>@endif
+                    </td>
+                    <td class="text-right">{{$product->quantity}}</td>
+                    @else
+                    <td class="text-right">{{ number_format($product->price, 2) }}</td>
                     @endif
                     <td>
                         <span class="right badge badge-{{ $product->status ? 'success' : 'danger' }}">{{$product->status ? __('common.Active') : __('common.Inactive') }}</span>
@@ -88,6 +100,8 @@
                         $this.closest('tr').fadeOut(500, function() {
                             $(this).remove();
                         });
+                    }).fail(function(xhr) {
+                        Swal.fire('{{ __('Cannot delete') }}', (xhr.responseJSON && xhr.responseJSON.message) || '{{ __('Something went wrong.') }}', 'error');
                     });
                 }
             });

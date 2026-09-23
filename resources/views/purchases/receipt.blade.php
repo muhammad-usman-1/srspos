@@ -187,7 +187,7 @@
     </div>
     <div class="info-row">
         <span class="info-label">Created By:</span>
-        <span class="info-value">{{ $purchase->user->name }}</span>
+        <span class="info-value">{{ $purchase->user?->getFullname() }}</span>
     </div>
 </div>
 
