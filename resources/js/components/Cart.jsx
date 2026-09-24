@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { createRoot } from "react-dom/client";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { drawerSupported, drawerPaired, pairDrawer, unpairDrawer, openDrawer } from "../cashDrawer";
 
 /* -------------------------------------------------------------------------
  * Offline-capable POS.
@@ -169,6 +170,7 @@ class Cart extends Component {
                 }
             })(),
             submitting: false,
+            drawerPaired: drawerPaired(),
             activeProduct: -1,
             activeCart: -1,
         };
@@ -552,7 +554,7 @@ class Cart extends Component {
     // native print dialog, which no web page is allowed to skip for security reasons.
     // To remove that dialog too, run Chrome/Edge with the --kiosk-printing flag, which
     // prints silently to the default printer.
-    printReceipt(sale, billNo) {
+    printReceipt(sale, billNo, afterPrint) {
         const html = buildReceiptHtml(sale, billNo, this.state.settings, window.APP.cashier);
         this.printFrame((f) => {
             f.onload = () => {
@@ -560,9 +562,58 @@ class Cart extends Component {
                     f.contentWindow.focus();
                     f.contentWindow.print();
                 } catch (e) {}
+                if (afterPrint) afterPrint();
             };
             f.srcdoc = html;
         });
+    }
+
+    // ---- cash drawer -----------------------------------------------------------
+    // Opens the drawer attached to the receipt printer after a cash sale's bill is printed.
+    // Does nothing unless a drawer has been connected on this till.
+    kickDrawer(sale) {
+        if (sale.method !== "cash" || !this.state.drawerPaired) return;
+        openDrawer().catch((e) => {
+            Swal.fire({ toast: true, position: "top-end", icon: "warning", title: "Cash drawer did not open", text: (e && e.message) || String(e), showConfirmButton: false, timer: 4000 });
+        });
+    }
+
+    async handleConnectDrawer() {
+        if (this.state.drawerPaired) {
+            const r = await Swal.fire({
+                title: "Cash drawer",
+                text: "The drawer opens automatically after every cash sale receipt.",
+                showDenyButton: true, showCancelButton: true,
+                confirmButtonText: "Test open", denyButtonText: "Disconnect", cancelButtonText: "Close",
+            });
+            if (r.isConfirmed) {
+                openDrawer().catch((e) => Swal.fire("Cash drawer", (e && e.message) || String(e), "error"));
+            } else if (r.isDenied) {
+                unpairDrawer();
+                this.setState({ drawerPaired: false });
+            }
+            return;
+        }
+
+        const r = await Swal.fire({
+            title: "Connect cash drawer",
+            html: "Choose how the receipt printer (SpeedX SP210) is connected to this computer.<br><small class=\"text-muted\">The browser will then ask you to pick the printer once.</small>",
+            showDenyButton: !!navigator.usb && !!navigator.serial,
+            showCancelButton: true,
+            confirmButtonText: navigator.serial ? "COM / Serial port" : "USB",
+            denyButtonText: "USB",
+        });
+        if (!r.isConfirmed && !r.isDenied) return;
+        const kind = r.isConfirmed && navigator.serial ? "serial" : "usb";
+        try {
+            await pairDrawer(kind);
+            this.setState({ drawerPaired: true });
+            await openDrawer();
+            Swal.fire({ toast: true, position: "top-end", icon: "success", title: "Cash drawer connected", showConfirmButton: false, timer: 2500 });
+        } catch (e) {
+            if (e && e.name === "NotFoundError") return; // picker closed without choosing
+            Swal.fire("Cash drawer", (e && e.message) || String(e), "error");
+        }
     }
 
     // ---- checkout --------------------------------------------------------------
@@ -615,7 +666,7 @@ class Cart extends Component {
         // 3. try to upload right away
         const saved = await this.syncQueue();
         if (saved[sale.uuid]) {
-            if (autoPrint) this.printReceipt(sale, saved[sale.uuid]);
+            if (autoPrint) this.printReceipt(sale, saved[sale.uuid], () => this.kickDrawer(sale));
             Swal.fire({ toast: true, position: "top-end", icon: "success", title: `Payment recorded - Order #${saved[sale.uuid]}`, showConfirmButton: false, timer: 2500 });
             return;
         }
@@ -632,7 +683,7 @@ class Cart extends Component {
         const ref = "OFF-" + String(seq).padStart(4, "0");
         const withRef = { ...sale, offline_ref: ref };
         this.setQueue(this.queueRef.map((q) => (q.uuid === sale.uuid ? withRef : q)));
-        if (autoPrint) this.printReceipt(withRef, ref);
+        if (autoPrint) this.printReceipt(withRef, ref, () => this.kickDrawer(withRef));
         Swal.fire({ toast: true, position: "top-end", icon: "info", title: `Saved offline (${ref})`, text: "It will upload automatically when the internet returns.", showConfirmButton: false, timer: 3500 });
     }
 
@@ -933,6 +984,15 @@ class Cart extends Component {
                                 <span className="pos-switch-track"><span className="pos-switch-thumb"></span></span>
                                 <span className="pos-switch-label">Print receipt automatically</span>
                             </label>
+                            {drawerSupported() && (
+                                <button
+                                    type="button" className="btn btn-link btn-sm p-0 d-block mb-2 pos-switch-label"
+                                    onClick={() => this.handleConnectDrawer()}
+                                >
+                                    <i className={"fas fa-cash-register mr-1 " + (this.state.drawerPaired ? "text-success" : "")}></i>
+                                    {this.state.drawerPaired ? "Cash drawer connected" : "Connect cash drawer"}
+                                </button>
+                            )}
 
                             <div className="pos-actions">
                                 <button type="button" className="pos-btn pos-btn-hold" disabled={!cart.length} onClick={this.handleHoldBill}>
